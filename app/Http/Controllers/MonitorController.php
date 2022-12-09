@@ -7,6 +7,49 @@ use App\Models\Monitor;
 
 class MonitorController extends Controller
 {
+
+    public function index()
+    {
+        // Retrieve the data you want to pass to the component
+        $data = Monitor::all();
+        dd($data);
+        return Inertia::share('Dashboard', [
+            'monitors' => $data,
+        ]);
+    }
+
+    /**
+     * Convert the object instance to an array.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'id' => $this->id,
+            'refund' => $this->refund,
+        ];
+    }
+
+    /**
+     * Convert the object instance to JSON.
+     *
+     * @param  int  $options
+     * @return string
+     *
+     * @throws \Exception
+     */
+    public function toJson($options = 0)
+    {
+        $json = json_encode($this->toArray(), $options);
+    
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            throw new \Exception(json_last_error_msg());
+        }
+    
+        return $json;
+    }
+
     /**
      * Store a new monitor.
      *

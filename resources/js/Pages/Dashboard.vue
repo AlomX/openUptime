@@ -2,8 +2,14 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/inertia-vue3';
 import MonitorChart from '@/Components/MonitorChart.vue';
-import AddMonitorForm from './Monitor/Partials/AddMonitorForm.vue';
-import MonitorList from './Monitor/Partials/MonitorList.vue';
+import AddMonitorForm from '@/Pages/Monitor/Partials/AddMonitorForm.vue';
+import MonitorList from '@/Pages/Monitor/Partials/MonitorList.vue';
+
+const props = defineProps({
+    monitors: {
+        type: Object
+    }
+});
 </script>
 
 <template>
@@ -32,9 +38,10 @@ import MonitorList from './Monitor/Partials/MonitorList.vue';
             </div>
         </div>
 
-        <div class="pt-6">
+        <div class="">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <MonitorList
+                    :monitors="props.monitors"
                     class="w-full"
                 />
             </div>

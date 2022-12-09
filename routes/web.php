@@ -29,7 +29,13 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
-        'monitors' => Monitor::all('id')
+        'monitors' => fn () => Monitor::all()->map(function ($monitor) {
+            return [
+                'id' => $monitor->id,
+                'name' => $monitor->name,
+                'address' => $monitor->address
+            ];
+        }),
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
