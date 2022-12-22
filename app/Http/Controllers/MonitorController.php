@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Monitor;
+use Inertia\Inertia;
 
 class MonitorController extends Controller
 {
@@ -11,9 +12,20 @@ class MonitorController extends Controller
     public function index()
     {
         // Retrieve the data you want to pass to the component
-        $data = Monitor::all();
-        dd($data);
-        return Inertia::share('Dashboard', [
+        $data = Monitor::with('pings')->get()->map(function ($monitor) {
+            return [
+                'id' => $monitor->id,
+                'name' => $monitor->name,
+                'address' => $monitor->address,
+                'pings' => $monitor->pings->map(function ($ping) {
+                    return [
+                        'response_code' => $ping->response_code,
+                        'response_time' => $ping->response_time,
+                        'created_at' => $ping->created_at
+                    ];}),
+            ];
+        });
+        return Inertia::render('Dashboard', [
             'monitors' => $data,
         ]);
     }
@@ -61,6 +73,9 @@ class MonitorController extends Controller
         $monitor = new Monitor;
         $monitor->name = $request->name;
         $monitor->address = $request->address;
+
+        $monitor->key = random_int(100000000, 999999999);
+
         $monitor->save();
         return true;
     }

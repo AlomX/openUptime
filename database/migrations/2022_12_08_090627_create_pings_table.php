@@ -14,12 +14,13 @@ return new class extends Migration
     public function up()
     {
         Schema::create('pings', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             
-            $table->bigInteger('monitor_id')->unsigned();
+            $table->foreignUuid('monitor_id');
             $table->foreign('monitor_id')->references('id')->on('monitors');
 
-            $table->tinyInteger('time');
+            $table->string('response_code', 15);
+            $table->tinyInteger('response_time');
 
             $table->timestamps();
         });

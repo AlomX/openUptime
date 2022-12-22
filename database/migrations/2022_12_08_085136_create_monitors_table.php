@@ -14,14 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::create('monitors', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            
             $table->string('name');
             $table->string('address');
             $table->bigInteger('refresh_time')->default(600000);
-            $table->date('last_call')->nullable();
 
             // For custom ping commands
             $table->string('command')->nullable();
+            $table->bigInteger('key');
 
             $table->timestamps();
         });

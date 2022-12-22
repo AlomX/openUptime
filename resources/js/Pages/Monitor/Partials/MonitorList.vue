@@ -11,7 +11,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log(props.monitors);    
+    console.log(props.monitors);
 });
 </script>
 
