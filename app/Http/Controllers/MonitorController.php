@@ -17,7 +17,7 @@ class MonitorController extends Controller
                 'id' => $monitor->id,
                 'name' => $monitor->name,
                 'address' => $monitor->address,
-                'pings' => $monitor->pings->map(function ($ping) {
+                'pings' => $monitor->pings->sortBy('created_at')->take(100)->map(function ($ping) {
                     return [
                         'response_code' => $ping->response_code,
                         'response_time' => $ping->response_time,
