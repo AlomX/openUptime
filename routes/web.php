@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\MonitorController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+use App\Http\Controllers\MonitorController;
+use App\Http\Controllers\PingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,16 +28,21 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', [MonitorController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard', [
+        'monitors' => \App\Models\monitor::all(),
+    ]);
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::post('/dashboard', [MonitorController::class, 'store'])->name('monitor.store');
-    Route::patch('/dashboard', [MonitorController::class, 'update'])->name('monitor.update');
-    Route::delete('/dashboard', [MonitorController::class, 'destroy'])->name('monitor.destroy');
+    Route::resource('monitors', MonitorController::class);
+
+    Route::get('/monitors/{monitor}/ping', [MonitorController::class, 'ping'])->name('monitors.ping');
+    Route::get('/monitors/{monitor}/latestPings', [MonitorController::class, 'latestPings'])->name('monitors.latestPings');
 });
 
 require __DIR__.'/auth.php';

@@ -3,33 +3,29 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
-use DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         // \App\Models\User::factory(10)->create();
 
+        // \App\Models\User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
+
         \App\Models\User::factory()->create([
+            'id' => "7e57d004-2b97-0e7a-b45f-5387367791cd",
             'name' => 'Admin',
-            'email' => 'admin@example.com'
+            'email' => 'webmaster@espi21.com',
+            'password' => Hash::make('b2cter9@'),
         ]);
-
-        
-        DB::table('monitors')->insert([
-            'id' => "7ac5bada-823e-4d31-bfab-c1436a4fbc9d",
-            'name' => "Google",
-            'address' => "https://google.com",
-            'key' => random_int(100000000, 999999999),
-        ]);
-
-        \App\Models\Ping::factory()->count(100)->create();
     }
 }

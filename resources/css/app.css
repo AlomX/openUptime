@@ -1,3 +1,40 @@
+@import 'bootstrap-icons/font/bootstrap-icons';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --swiper-theme-color: #6666ff!important;
+}
+
+/* Firefox */
+*{
+    scrollbar-width: thin;
+    scrollbar-color: #6666ff rgba(132, 132, 285, 0.5);
+}
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+    width: 15px;
+}
+*::-webkit-scrollbar-track {
+    background: rgba(132, 132, 285, 0.5);
+    border-radius: 5px;
+}
+*::-webkit-scrollbar-thumb {
+    background-color: #6666ff;
+    border-radius: 14px;
+}
+
+input[type="color"] {
+	-webkit-appearance: none;
+	border: none;
+    border-radius: 0.5rem;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+	border: none;
+    border-radius: 0.5rem;
+}

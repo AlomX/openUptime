@@ -3,20 +3,60 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\UUID;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Monitor extends Model
 {
-    use HasFactory, UUID;
-
-    protected $fillable = ['name', 'address', 'last_call', 'command', 'created_at', 'edited_at'];
+    use HasFactory, HasUuids;
 
     /**
-     * Get the pings.
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
      */
-    public function pings()
+    protected $fillable = [
+        'name',
+        'address',
+        'interval',
+        'command',
+        'key',
+        'user_id',
+    ];
+
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array<int, string>
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+    ];
+
+    /**
+     * Get the user that owns the Monitor.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the Pings for the Monitor.
+     */
+    public function Pings(): HasMany
     {
         return $this->hasMany(Ping::class);
+    }
+
+    /**
+     * Get the 50 latest Ping for the Monitor.
+     */
+    public function latestPings(): HasMany
+    {
+        return $this->hasMany(Ping::class)->latest()->limit(50);
     }
 }

@@ -2,107 +2,118 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\monitor;
 use Illuminate\Http\Request;
-use App\Models\Monitor;
-use Inertia\Inertia;
 
 class MonitorController extends Controller
 {
-
+    /**
+     * Display a listing of the resource.
+     */
     public function index()
     {
-        // Retrieve the data you want to pass to the component
-        $data = Monitor::with('pings')->get()->map(function ($monitor) {
-            return [
-                'id' => $monitor->id,
-                'name' => $monitor->name,
-                'address' => $monitor->address,
-                'pings' => $monitor->pings->sortBy('created_at')->take(100)->map(function ($ping) {
-                    return [
-                        'response_code' => $ping->response_code,
-                        'response_time' => $ping->response_time,
-                        'created_at' => $ping->created_at
-                    ];}),
-            ];
-        });
-        return Inertia::render('Dashboard', [
-            'monitors' => $data,
-        ]);
+        $monitors = monitor::all();
+        return response()->json([
+            'monitors' => $monitors
+        ],200);
+        
     }
 
     /**
-     * Convert the object instance to an array.
-     *
-     * @return array
+     * Send the last 50 pings of the monitor.
      */
-    public function toArray()
+    public function latestPings(monitor $monitor)
     {
-        return [
-            'id' => $this->id,
-            'refund' => $this->refund,
-        ];
+        $pings = $monitor->latestPings()->get();
+        return response()->json([
+            'pings' => $pings
+        ],200);
     }
 
     /**
-     * Convert the object instance to JSON.
-     *
-     * @param  int  $options
-     * @return string
-     *
-     * @throws \Exception
+     * Show the form for creating a new resource.
      */
-    public function toJson($options = 0)
+    public function create()
     {
-        $json = json_encode($this->toArray(), $options);
-    
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            throw new \Exception(json_last_error_msg());
-        }
-    
-        return $json;
+        //
     }
 
     /**
-     * Store a new monitor.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Inertia\Response
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $monitor = new Monitor;
-        $monitor->name = $request->name;
-        $monitor->address = $request->address;
+        $request->validate([
+            'name' => 'required',
+            'address' => 'required',
+        ]);
 
-        $monitor->key = random_int(100000000, 999999999);
-
-        $monitor->save();
-        return true;
+        $monitor = monitor::create([
+            'name' => $request->name,
+            'address' => $request->address,
+            'user_id' => auth()->user()->id,
+        ]);
+        
+        return response()->json([
+            'monitor' => $monitor
+        ],201);
     }
 
     /**
-     * Update the monitor information.
-     *
-     * @param  \App\Http\Requests\ProfileUpdateRequest  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Display the specified resource.
      */
-    public function update(ProfileUpdateRequest $request)
+    public function show(monitor $monitor)
     {
-        $request->monitor()->fill($request->validated());
-
-        $request->monitor()->save();
-
-        return Redirect::route('dashboard');
+        //
     }
 
     /**
-     * Delete the monitor.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * Show the form for editing the specified resource.
      */
-    public function destroy(Request $request)
+    public function edit(monitor $monitor)
     {
-
+        //
     }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, monitor $monitor)
+    {
+        $monitor = $monitor->update($request->all());
+        return response()->json([
+            'monitor' => $monitor
+        ],200);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(monitor $monitor)
+    {
+        //delete all ping link to this monitor
+        $monitor->pings()->delete();
+        //delete the monitor
+        $monitor->delete();
+        return response()->json(true,204);
+    }
+
+    /**
+     * Ping the adress of the monitor using shell_exec.
+     * Adapt depending on the OS.
+     */
+    public function ping(monitor $monitor) {
+        $ping = shell_exec('ping -n 1 ' . $monitor->address);
+        dd($ping);
+        $ping = explode(' ', $ping);
+        $ping = $ping[6];
+        $ping = explode('=', $ping);
+        $ping = $ping[1];
+        $ping = explode('.', $ping);
+        $ping = $ping[0];
+        return response()->json([
+            'ping' => $ping
+        ],200);
+    }
+
 }

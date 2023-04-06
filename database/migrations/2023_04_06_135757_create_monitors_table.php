@@ -3,26 +3,28 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('monitors', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            
+
             $table->string('name');
             $table->string('address');
-            $table->bigInteger('refresh_time')->default(600000);
+            $table->bigInteger('interval')->default(600000);
 
             // For custom ping commands
             $table->string('command')->nullable();
-            $table->bigInteger('key');
+            $table->bigInteger('key')->default(Str::uuid());
+
+            $table->uuid('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
 
             $table->timestamps();
         });
@@ -30,10 +32,8 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('monitors');
     }
