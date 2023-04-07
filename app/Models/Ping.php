@@ -17,9 +17,8 @@ class Ping extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'Monitor_id',
+        'monitor_id',
         'response_time',
-        'response_code',
     ];
 
     /**
@@ -41,26 +40,19 @@ class Ping extends Model
     }
 
     /**
-     * Get the response time in milliseconds.
-     */
-    public function getResponseTimeMsAttribute(): int
-    {
-        return $this->response_time * 1000;
-    }
-
-    /**
      * Get the response color by code.
      */
     public function getResponseColorAttribute(): string
     {
-        switch ($this->response_code) {
-            case 200:
-                return 'green';
-            case 301:
-            case 302:
-                return 'yellow';
-            default:
-                return 'red';
+        // If the response_time is null, the monitor is offline so we return red
+        // If the response_time is greater than 500ms, the monitor is slow so we return orange
+        // If the response_time is less than 500ms, the monitor is fast so we return green
+        if ($this->response_time === null) {
+            return 'red';
+        } elseif ($this->response_time > 0.5) {
+            return 'orange';
+        } else {
+            return 'green';
         }
     }
 }

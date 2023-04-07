@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('monitors', MonitorController::class);
 
     Route::get('/monitors/{monitor}/ping', [MonitorController::class, 'ping'])->name('monitors.ping');
+    Route::get('/monitors/{monitor}/pings', [MonitorController::class, 'pings'])->name('monitors.pings');
     Route::get('/monitors/{monitor}/latestPings', [MonitorController::class, 'latestPings'])->name('monitors.latestPings');
 });
 

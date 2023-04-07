@@ -1,0 +1,4 @@
+php artisan schedule:run
+
+crontab -e
+* * * * 30 cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1

@@ -6,6 +6,7 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 import MonitorInfo from '@/Components/MonitorInfo.vue';
+import MonitorDetails from '@/Components/MonitorDetails.vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -14,6 +15,10 @@ const props = defineProps({
     }
 });
 
+let listMonitors = ref(props.monitors);
+let selectedMonitor = ref(null);
+
+const showDetailsMonitorModal = ref(false);
 const showNewMonitorModal = ref(false);
 const monitorName = ref('');
 const monitorAdress = ref('');
@@ -39,7 +44,7 @@ const loadMonitors = async () => {
     await axios
         .get('/monitors')
         .then((response) => {
-            props.monitors = response.data;
+            listMonitors.value = response.data.monitors;
         })
         .catch((error) => {
             console.log(error);
@@ -53,10 +58,17 @@ const loadMonitors = async () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Dashboard</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Tableau de bord</h2>
+                
+                <!-- Add button aligned to the right -->
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="showNewMonitorModal = true">
+                    Ajouter un appareil
+                </button>
+            </div>
         </template>
 
-        <div class="py-12">
+        <!--div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">Bienvenue dans votre gestion des appareils en ligne</div>
@@ -65,13 +77,14 @@ const loadMonitors = async () => {
                     </button>
                 </div>
             </div>
-        </div>
+        </div-->
 
         <!-- foreach monitors -->
-        <div class="grid sm:grid-cols-2 gap-4 pt-6" v-for="monitor in props.monitors" :key="monitor.id">
-            <MonitorInfo :monitor="monitor" />
+        <div class="py-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 min-[2500px]:grid-cols-6 gap-4 auto-cols-[minmax(0,_2fr)] px-5">
+            <MonitorInfo :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" @click="selectedMonitor = monitor; showDetailsMonitorModal = true" />
         </div>
 
+        <MonitorDetails :monitor="selectedMonitor" :showDetailsMonitorModal="showDetailsMonitorModal" :key="selectedMonitor" />
 
         <!-- modal to add a new monitor -->
         <Modal :show="showNewMonitorModal" @close="showNewMonitorModal = false">
