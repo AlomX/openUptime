@@ -30,7 +30,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard', [
-        'monitors' => \App\Models\monitor::all(),
+        'monitors' => \App\Models\Monitor::all(),
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 

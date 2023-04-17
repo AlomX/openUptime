@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\monitor;
+use App\Models\Monitor;
 use Illuminate\Http\Request;
 
 class MonitorController extends Controller
