@@ -60,8 +60,6 @@ const loadFavicon = (address) => {
     img.onload = function() {
         if( img.width != 16 ) {
             favicon.value = icon;
-            console.log(img.width);
-            console.log(favicon.value);
             return;
         }else{
             favicon.value = 'icon';
