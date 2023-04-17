@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             'id' => "7e57d004-2b97-0e7a-b45f-5387367791cd",
             'name' => 'Admin',
             'email' => 'webmaster@espi21.com',
-            'password' => Hash::make('b2cter9@'),
+            'password' => Hash::make('espi21'),
         ]);
     }
 }

@@ -95,7 +95,7 @@ const loadFavicon = (address) => {
             </span>
             <div class="w-full left-0 right-0 mt-3" v-if="pings">
                 <div class="object-fill max-w-full flex gap-x-0.5 flex-nowrap flex-row-reverse">
-                    <div class="flex-auto" v-for="ping in pings.slice().reverse()" :key="ping.created_at">
+                    <div class="flex-auto" v-for="ping in pings.slice()" :key="ping.created_at">
                         <Popper style="border: 0!important; margin: 0!important; display:block!important;" arrow placement="bottom" :content="ping.response_time + ' ms'">
                             <div class="rounded cursor-help" 
                                 v-bind:class="pingColor(ping)"
