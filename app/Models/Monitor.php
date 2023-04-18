@@ -59,4 +59,12 @@ class Monitor extends Model
     {
         return $this->hasMany(Ping::class)->latest()->limit(50);
     }
+
+    /**
+     * Get the last Ping for the Monitor.
+     */
+    public function lastPing(): ?Ping
+    {
+        return $this->hasMany(Ping::class)->latest()->first();
+    }
 }

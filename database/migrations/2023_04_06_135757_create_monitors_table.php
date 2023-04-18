@@ -17,7 +17,11 @@ return new class extends Migration
 
             $table->string('name');
             $table->string('address');
-            $table->bigInteger('interval')->default(600000);
+            $table->string('url')->nullable();
+            $table->bigInteger('interval')->default(60000);
+            $table->string('note')->nullable();
+            $table->string('icon')->default('hdd-network');
+
 
             // For custom ping commands
             $table->string('command')->nullable();
