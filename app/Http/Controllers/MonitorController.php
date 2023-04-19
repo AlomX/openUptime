@@ -42,6 +42,24 @@ class MonitorController extends Controller
     }
 
     /**
+     * Get the last ping and verify if his response_time is 0.
+     * If it's 0, get the last time the monitor was up.
+     * If it's not 0, get the last time the monitor was down.
+     */
+    public function lastChange(monitor $monitor)
+    {
+        $lastPing = $monitor->latestPings()->get();
+        if($lastPing[0]->response_time == 0) {
+            $lastChange = $monitor->pings()->where('response_time', '!=', 0)->latest()->first();
+        }else{
+            $lastChange = $monitor->pings()->where('response_time', '=', 0)->latest()->first();
+        }
+        return response()->json([
+            'lastChange' => $lastChange
+        ],200);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -54,17 +72,32 @@ class MonitorController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
-        
         $request->validate([
             'name' => 'required',
             'address' => 'required',
         ]);
 
+        if( !filter_var($request->address, FILTER_VALIDATE_URL) && !filter_var($request->address, FILTER_VALIDATE_IP) && !filter_var($request->address, FILTER_VALIDATE_DOMAIN) ) {
+            return response()->json([
+                'message' => 'Invalid URL'
+            ],400);
+        }
+        
+        if( !filter_var($request->url, FILTER_VALIDATE_URL) ) {
+            $url = $request->address;
+        }else{
+            $url = $request->url;
+        }
+
         $monitor = monitor::create([
             'name' => $request->name,
             'address' => self::cleanUrl($request->address),
             'user_id' => auth()->user()->id,
+            'url' => $url,
+            'interval' => $request->interval,
+            'command' => $request->command,
+            'note' => $request->note,
+            'icon' => $request->icon,
         ]);
         
         return response()->json([
@@ -131,8 +164,10 @@ class MonitorController extends Controller
             // Linux 
             $pingInfo = shell_exec('ping -c 1 ' . $monitor->address . ' | grep "ttl="');
         }
-        
-        echo $pingInfo;
+
+        if( !empty($monitor->command) ) {
+            shell_exec($monitor->command);
+        }
 
         // if ping contains unknown host or not found
         if(strpos($pingInfo, 'unknown host') !== false 

@@ -30,7 +30,8 @@ class PingCron extends Command
         // Foreach monitor in the database launch ping function
         foreach (Monitor::all() as $monitor) {
             // verify if the last ping respect the interval of the monitor
-            if ($monitor->lastPing() && $monitor->lastPing()->created_at->addMilliseconds($monitor->interval - 100)->isPast()) {
+            if ($monitor->lastPing() && $monitor->lastPing()->created_at->addMilliseconds($monitor->interval - 10000)->isPast() 
+                || !$monitor->lastPing()) {
                 MonitorController::ping($monitor);
             }
         }

@@ -23,9 +23,10 @@ const showNewMonitorModal = ref(false);
 const monitorName = ref('');
 const monitorAdress = ref('');
 const monitorUrl = ref('');
-const monitorInterval = ref(60000);
+const monitorInterval = ref(300000);
 const monitorNote = ref('');
-const monitorIcon = ref('');
+const monitorIcon = ref('favicon');
+const monitorCommand = ref('');
 
 let openParameters = ref(false);
 
@@ -37,6 +38,8 @@ const createMonitor = async () => {
             url: monitorUrl.value,
             interval: monitorInterval.value,
             note: monitorNote.value,
+            icon: monitorIcon.value,
+            command: monitorCommand.value,
         })
         .then((response) => {
             loadMonitors();
@@ -58,6 +61,15 @@ const loadMonitors = async () => {
         .catch((error) => {
             console.log(error);
         });
+}
+
+const changeIcon = () => {
+    document.getElementById('icon').attributes.removeNamedItem('class');
+    if(monitorIcon.value == 'favicon') {
+        document.getElementById('icon').setAttribute('class', 'bi bi-question-circle-fill');
+    }else{
+        document.getElementById('icon').setAttribute('class', 'bi bi-' + monitorIcon.value);
+    }
 }
 
 </script>
@@ -126,7 +138,7 @@ const loadMonitors = async () => {
                                     </div>
                                     <div class="flex justify-between items-center mt-2">
                                         <h3 class="text-gray-800 dark:text-gray-200 text-sm font-semibold">Fréquence</h3>
-                                        <select class="w-24 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" v-model="monitorInterval">
+                                        <select class="w-48 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" v-model="monitorInterval">
                                             <option value="60000">1 min</option>
                                             <option value="300000">5 min</option>
                                             <option value="600000">10 min</option>
@@ -140,12 +152,29 @@ const loadMonitors = async () => {
                                         </select>
                                     </div>
                                     <div class="flex justify-between items-center mt-2">
-                                        <h3 class="text-gray-800 dark:text-gray-200 text-sm font-semibold">Icone</h3>
-                                        <select class="w-24 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" v-model="monitorIcon">
-                                            <option value="hdd-network"><i style="font-family: bootstrap-icons !important;" class="bi bi-hdd-network"></i></option> /////////
+                                        <h3 class="text-gray-800 dark:text-gray-200 text-sm font-semibold">Icone <i id="icon" class="bi bi-question-circle-fill"></i></h3>
+                                        <!-- icons select using bi icons -->
+                                        <select class="w-48 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" v-model="monitorIcon" @change="changeIcon">
+                                            <option value="favicon">Icone de l'URL</option>
+                                            <option value="hdd-network">Serveur</option>
+                                            <option value="hdd-rack">Serveur Rack</option>
+                                            <option value="pc-display">Ordinateur</option>
+                                            <option value="laptop">Ordinateur Portable</option>
+                                            <option value="tablet">Tablette</option>
+                                            <option value="telephone">Téléphone Fixe</option>
+                                            <option value="phone">Téléphone Portable</option>
+                                            <option value="tv">Télévision</option>
+                                            <option value="camera-video">Caméra</option>
+                                            <option value="router">Router</option>
+                                            <option value="modem">Modeme</option>
+                                            <option value="printer">Imprimante</option>
+                                            <option value="motherboard">Autre</option>
                                         </select>
                                     </div> 
                                     <textarea class="w-80 h-20 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4 mt-2" placeholder="Note" v-model="monitorNote"></textarea>
+                                    <div class="flex justify-between items-center">
+                                        <input type="text" class="w-80 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" placeholder="Commande a éxécuter avec le ping" v-model="monitorCommand">
+                                    </div>
                                 </div>
                             </div>
                             <!-- buttons -->

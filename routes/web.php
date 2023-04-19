@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/monitors/{monitor}/ping', [MonitorController::class, 'ping'])->name('monitors.ping');
     Route::get('/monitors/{monitor}/pings', [MonitorController::class, 'pings'])->name('monitors.pings');
     Route::get('/monitors/{monitor}/latestPings', [MonitorController::class, 'latestPings'])->name('monitors.latestPings');
+    Route::get('/monitors/{monitor}/lastChange', [MonitorController::class, 'lastChange'])->name('monitors.lastChange');
+    
 });
 
 require __DIR__.'/auth.php';

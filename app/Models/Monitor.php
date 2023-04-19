@@ -22,6 +22,9 @@ class Monitor extends Model
         'address',
         'interval',
         'command',
+        'url',
+        'note',
+        'icon',
         'key',
         'user_id',
     ];
