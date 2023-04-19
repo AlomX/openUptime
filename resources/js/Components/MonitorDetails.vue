@@ -7,6 +7,8 @@ import VueApexCharts from "vue3-apexcharts";
 import axios from 'axios';
 import moment from 'moment';
 
+const emit = defineEmits(['close']);
+
 const props = defineProps({
     monitor: {
         type: Object,
@@ -136,7 +138,7 @@ const loadPings = async () => {
 
 <template>
     <!-- modal to add a new monitor -->
-    <Modal :show="showDetailsMonitorModal" @close="showDetailsMonitorModal = false;">
+    <Modal :show="showDetailsMonitorModal" @close="emit('close')">
         <div class="flex flex-col justify-center items-center h-screen">
             <div class="bg-white rounded-lg shadow-xl px-6">
                 <div class="pt-8">

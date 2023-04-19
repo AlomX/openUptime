@@ -33,6 +33,7 @@ class PingCron extends Command
             if ($monitor->lastPing() && $monitor->lastPing()->created_at->addMilliseconds($monitor->interval - 10000)->isPast() 
                 || !$monitor->lastPing()) {
                 MonitorController::ping($monitor);
+                MonitorController::deleteOldPing($monitor);
             }
         }
     }

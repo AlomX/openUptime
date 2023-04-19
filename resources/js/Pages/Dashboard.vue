@@ -19,6 +19,7 @@ let listMonitors = ref(props.monitors);
 let selectedMonitor = ref(null);
 
 const showDetailsMonitorModal = ref(false);
+const showDeleteMonitorModal = ref(false);
 const showNewMonitorModal = ref(false);
 const monitorName = ref('');
 const monitorAdress = ref('');
@@ -46,10 +47,67 @@ const createMonitor = async () => {
         })
         .catch((error) => {
             console.log(error);
-
         });
     
     showNewMonitorModal.value = false;
+}
+
+const updateMonitor = async () => {
+    await axios 
+        .put('/monitors/' + selectedMonitor.value.id, {
+            name: monitorName.value,
+            address: monitorAdress.value,
+            url: monitorUrl.value,
+            interval: monitorInterval.value,
+            note: monitorNote.value,
+            icon: monitorIcon.value,
+            command: monitorCommand.value,
+        })
+        .then((response) => {
+            loadMonitors();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    
+    showNewMonitorModal.value = false;
+}
+
+const deleteMonitor = async () => {
+    await axios 
+        .delete('/monitors/' + selectedMonitor.value.id)
+        .then((response) => {
+            loadMonitors();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    
+    showDeleteMonitorModal.value = false;
+}
+
+const add = () => {
+    monitorName.value = '';
+    monitorAdress.value = '';
+    monitorUrl.value = '';
+    monitorInterval.value = 300000;
+    monitorNote.value = '';
+    monitorIcon.value = 'favicon';
+    monitorCommand.value = '';
+    selectedMonitor.value = null;
+    showNewMonitorModal.value = true;
+}
+
+const edit = (monitor) => {
+    monitorName.value = monitor.name;
+    monitorAdress.value = monitor.address;
+    monitorUrl.value = monitor.url;
+    monitorInterval.value = monitor.interval;
+    monitorNote.value = monitor.note;
+    monitorIcon.value = monitor.icon;
+    monitorCommand.value = monitor.command;
+    selectedMonitor.value = monitor;
+    showNewMonitorModal.value = true;
 }
 
 const loadMonitors = async () => {
@@ -83,7 +141,7 @@ const changeIcon = () => {
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Tableau de bord</h2>
                 
                 <!-- Add button aligned to the right -->
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="showNewMonitorModal = true">
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="add">
                     Ajouter un appareil
                 </button>
             </div>
@@ -102,20 +160,21 @@ const changeIcon = () => {
 
         <!-- foreach monitors -->
         <div class="py-4 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[2500px]:grid-cols-8 gap-4 auto-cols-[minmax(0,_2fr)] px-5">
-            <MonitorInfo :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" @click="selectedMonitor = monitor; showDetailsMonitorModal = true" />
+            <MonitorInfo :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" @stats="selectedMonitor = monitor; showDetailsMonitorModal = true;" @edit="edit(monitor)" @delete="selectedMonitor = monitor; showDeleteMonitorModal = true;" />
         </div>
-
-        <MonitorDetails :monitor="selectedMonitor" :showDetailsMonitorModal="showDetailsMonitorModal" :key="selectedMonitor" />
+        
+        <MonitorDetails :monitor="selectedMonitor" :showDetailsMonitorModal="showDetailsMonitorModal" :key="selectedMonitor" @close="showDetailsMonitorModal = false; selectedMonitor = null;" />
 
         <!-- modal to add a new monitor -->
-        <Modal :show="showNewMonitorModal" @close="showNewMonitorModal = false">
+        <Modal :show="showNewMonitorModal" @close="showNewMonitorModal = false;">
             <div class="flex flex-col justify-center items-center h-screen">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-96">
                     <div class="flex flex-col justify-center items-center pt-8">
                         <div class="flex justify-center items-center w-16 h-16 rounded-full bg-blue-500">
                             <i class="bi bi-hdd-network text-white text-4xl pt-2"></i>
                         </div>
-                        <h2 class="text-gray-800 dark:text-gray-200 text-2xl font-semibold mt-2">Nouvel Appareil</h2>
+                        <h2 class="text-gray-800 dark:text-gray-200 text-2xl font-semibold mt-2" v-if="!selectedMonitor">Nouvel Appareil</h2>
+                        <h2 class="text-gray-800 dark:text-gray-200 text-2xl font-semibold mt-2" v-else>Editer un Appareil</h2>
                     </div>
                     <div class="flex flex-col justify-center items-center pt-4 pb-8">
                         <form class="flex flex-col justify-center items-center">
@@ -180,7 +239,31 @@ const changeIcon = () => {
                             <!-- buttons -->
                             <div class="flex justify-center items-center w-full mt-2 gap-2">
                                 <button class="w-1/2 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold focus:outline-none" type="button" @click="showNewMonitorModal = false">Annuler</button>
-                                <button class="w-1/2 h-10 rounded-lg bg-blue-500 text-white text-sm font-semibold focus:outline-none" type="submit" @click.prevent="createMonitor()">Créer</button>
+                                <button class="w-1/2 h-10 rounded-lg bg-blue-500 text-white text-sm font-semibold focus:outline-none" type="submit" @click.prevent="createMonitor()" v-if="!selectedMonitor">Créer</button>
+                                <button class="w-1/2 h-10 rounded-lg bg-blue-500 text-white text-sm font-semibold focus:outline-none" type="submit" @click.prevent="updateMonitor()" v-else>Mettre à jour</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+
+        <!-- Deletion Modal -->
+        <Modal :show="showDeleteMonitorModal" @close="showDeleteMonitorModal = false">
+            <div class="flex flex-col justify-center items-center h-screen">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-96">
+                    <div class="flex flex-col justify-center items-center pt-8">
+                        <div class="flex justify-center items-center w-16 h-16 rounded-full bg-blue-500">
+                            <i class="bi bi-send-x text-white text-4xl pt-2 -ml-1"></i>
+                        </div>
+                        <h2 class="text-gray-800 dark:text-gray-200 text-2xl font-semibold mt-2">Supprimer un Appareil</h2>
+                    </div>
+                    <div class="flex flex-col justify-center items-center pt-4 pb-8">
+                        <form class="flex flex-col justify-center items-center">
+                            <h3 class="text-gray-800 dark:text-gray-200 text-sm font-semibold">Voulez-vous vraiment supprimer cet appareil ?</h3>
+                            <div class="flex justify-center items-center w-full mt-2 gap-2">
+                                <button class="w-1/2 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold focus:outline-none" type="button" @click="showDeleteMonitorModal = false">Annuler</button>
+                                <button class="w-1/2 h-10 rounded-lg bg-red-500 text-white text-sm font-semibold focus:outline-none" type="submit" @click.prevent="deleteMonitor()">Supprimer</button>
                             </div>
                         </form>
                     </div>

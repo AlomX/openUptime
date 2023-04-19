@@ -3,6 +3,8 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import moment from 'moment';
 import Popper from "vue3-popper";
 
+const emit = defineEmits(['edit', 'delete', 'stats']);
+
 const lastIcon = ref(null);
 const props = defineProps({
     monitor: {
@@ -150,16 +152,16 @@ const lastChange = async () => {
             <span class="w-4/12 text-right text-slate-500 shrink pt-1" v-if="pings">
                 <!-- options buttons -->
                 <div>
-                    <button class="btn btn-sm text-primary mr-2">
+                    <button class="btn btn-sm hover:text-blue-500 mr-2" @click="emit('edit')">
                         <i class="bi bi-pencil-fill"></i>
                     </button>
-                    <button class="btn btn-sm text-danger">
+                    <button class="btn btn-sm hover:text-red-500" @click="emit('delete')">
                         <i class="bi bi-trash-fill"></i>
                     </button>
                 </div>
                 <i ref="lastIcon" class="bi bi-clock"></i> {{ last_response }}
             </span>
-            <div class="w-full left-0 right-0 mt-1" v-if="pings">
+            <div class="w-full left-0 right-0 mt-1" v-if="pings" @click="emit('stats')">
                 <div class="object-fill max-w-full flex gap-x-0.5 flex-nowrap flex-row-reverse">
                     <div class="flex-auto" v-for="ping in pings.slice()" :key="ping.created_at">
                         <Popper style="border: 0!important; margin: 0!important; display:block!important;" arrow hover placement="bottom" :content="ping.response_time + ' ms'">

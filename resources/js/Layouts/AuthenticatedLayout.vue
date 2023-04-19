@@ -8,6 +8,13 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const themeStatus = ref(localStorage.theme);
+
+const switchTheme = () => {
+    localStorage.setItem('theme', localStorage.theme === 'light' ? 'dark' : 'light');
+    document.documentElement.classList.toggle('dark');
+    themeStatus.value = localStorage.theme;
+};
 </script>
 
 <template>
@@ -36,14 +43,25 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <div class="hidden sm:flex sm:items-center sm:ml-6">
+                            <!-- Switch Theme with tailwindCss -->
+                            <div class="relative">
+                                <button
+                                    type="button"
+                                    class="text-gray-600 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-400"
+                                    @click="switchTheme"
+                                >
+                                    <i class="bi bi-moon-fill" v-if="themeStatus === 'light'"></i>
+                                    <i class="bi bi-brightness-low-fill text-2xl -mr-1" v-else></i>
+                                </button>
+                            </div>
                             <!-- Settings Dropdown -->
-                            <div class="ml-3 relative">
+                            <div class="ml-2 relative">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150"
+                                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
                                             >
                                                 {{ $page.props.auth.user.name }}
 

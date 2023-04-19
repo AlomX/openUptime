@@ -126,10 +126,15 @@ class MonitorController extends Controller
      */
     public function update(Request $request, monitor $monitor)
     {
-        $monitor = $monitor->update($request->all());
-
-        $monitor->adress = self::cleanUrl($request->adress);
-        $monitor->save();
+        $monitor->update([
+            'name' => $request->name,
+            'address' => self::cleanUrl($request->address),
+            'url' => $request->url,
+            'interval' => $request->interval,
+            'command' => $request->command,
+            'note' => $request->note,
+            'icon' => $request->icon,
+        ]);
 
         return response()->json([
             'monitor' => $monitor
@@ -213,6 +218,16 @@ class MonitorController extends Controller
         return response()->json([
             'ping' => $ping
         ],200);
+    }
+
+    /**
+     * Delete ping of the monitor that are older than 15 days.
+     */
+    public static function deleteOldPing() {
+        $pings = $monitor->pings()->where('created_at', '<', Carbon::now()->subDays(15))->get();
+        foreach($pings as $ping) {
+            $ping->delete();
+        }
     }
 
     /**
