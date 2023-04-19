@@ -133,7 +133,7 @@ const lastChange = async () => {
         <div class="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
         <div class="relative p-4 sm:p-4 bg-white dark:bg-slate-800 dark:text-slate-200 shadow sm:rounded-lg auto-cols-max items-center flex flex-wrap">
             <div class="flex w-8/12">
-                <div class="shrink-0">
+                <Popper class="shrink-0 cursor-help" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover :content="monitor.note">
                     <img class="sm:block hidden h-auto w-12" :src="favicon" :alt="monitor.address + ' Logo'" v-if="favicon && favicon != 'icon'">
                     <div class="animate w-10 h-10 flex items-center justify-center" v-else-if="favicon == 'icon'">
                         <i :class="'bi bi-' + monitor.icon + ' text-4xl mt-4'"></i>
@@ -141,11 +141,11 @@ const lastChange = async () => {
                     <div class="animate animate-pulse w-10 h-10 flex items-center justify-center text" v-else>
                         <i class="bi bi-globe text-4xl mt-4"></i>
                     </div>
-                </div>
+                </Popper>
                 <div class="items-center pl-2 overflow-hidden">
-                    <p class="text-xl truncate">{{ monitor.name }}</p>
+                    <Popper class="text-lg truncate cursor-help" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover :content="monitor.name">{{ monitor.name }}</Popper>
                     <p>
-                        <a :href="monitor.url?monitor.url:'http://'+monitor.address" target="_blank" class="text-blue-500/[0.8] hover:text-blue-300 truncate"> ( {{ monitor.address }} ) </a>
+                        <a :href="monitor.url?monitor.url:'http://'+monitor.address" target="_blank" class="text-sm text-blue-500/[0.8] hover:text-blue-300 truncate"> ( {{ monitor.address }} ) </a>
                     </p>
                 </div>
             </div>
