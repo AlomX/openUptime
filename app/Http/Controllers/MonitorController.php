@@ -82,18 +82,12 @@ class MonitorController extends Controller
                 'message' => 'Invalid URL'
             ],400);
         }
-        
-        if( !filter_var($request->url, FILTER_VALIDATE_URL) ) {
-            $url = $request->address;
-        }else{
-            $url = $request->url;
-        }
 
         $monitor = monitor::create([
             'name' => $request->name,
             'address' => self::cleanUrl($request->address),
             'user_id' => auth()->user()->id,
-            'url' => $url,
+            'url' => $request->url,
             'interval' => $request->interval,
             'command' => $request->command,
             'note' => $request->note,
@@ -223,7 +217,7 @@ class MonitorController extends Controller
     /**
      * Delete ping of the monitor that are older than 15 days.
      */
-    public static function deleteOldPing() {
+    public static function deleteOldPing($monitor) {
         $pings = $monitor->pings()->where('created_at', '<', Carbon::now()->subDays(15))->get();
         foreach($pings as $ping) {
             $ping->delete();
