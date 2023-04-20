@@ -116,7 +116,7 @@ const lastChange = async () => {
         if (message == '') {
             message = '< 1 min';
         }
-        if (lastChange.response_time == 0 || lastChange.first == 1) {
+        if ((!lastChange.first && lastChange.response_time == 0) || (lastChange.first == 1 && lastChange.response_time > 0)) {
             lastIcon.value.attributes.removeNamedItem('class');
             lastIcon.value.setAttribute('class', 'bi bi-check-lg text-green-500');
             return message;
@@ -134,24 +134,24 @@ const lastChange = async () => {
     <div class="group relative">
         <div class="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
         <div class="relative p-4 sm:p-2 bg-white dark:bg-slate-800 dark:text-slate-200 shadow sm:rounded-lg auto-cols-max items-center flex flex-wrap">
-            <div class="flex w-8/12">
-                <Popper class="shrink-0 cursor-help" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover>
-                    <img class="sm:block hidden h-auto w-12" :src="favicon" :alt="monitor.address + ' Logo'" v-if="favicon && favicon != 'icon'">
-                    <div class="animate w-10 h-10 flex items-center justify-center" v-else-if="favicon == 'icon'">
-                        <i :class="'bi bi-' + monitor.icon + ' text-4xl mt-4'"></i>
-                    </div>
-                    <div class="animate animate-pulse w-10 h-10 flex items-center justify-center text" v-else>
-                        <i class="bi bi-globe text-4xl mt-4"></i>
-                    </div>
-                    <template #content>
-                        <div v-html="monitor.note?monitor.note.replace(/\r\n|\r|\n/g,'<br />'):null"></div>
-                    </template>
+            <div class="flex flex-wrap w-8/12">
+                <Popper class="w-full group-hover:pl-14 transition-all" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover :content="monitor.name">
+                    <div class="text-lg truncate cursor-help">{{ monitor.name }}</div>
                 </Popper>
-                <div class="items-center pl-2 overflow-hidden">
-                    <Popper style="border: 0!important; margin: 0!important; display:block!important;" arrow hover :content="monitor.name">
-                        <div class="text-lg truncate cursor-help">{{ monitor.name }}</div>
+                <div class="items-center flex">
+                    <Popper class="cursor-help pr-2 shrink-0" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover>
+                        <img class="h-auto w-7 group-hover:w-12 group-hover:-mt-7 transition-all" :src="favicon" :alt="monitor.address + ' Logo'" v-if="favicon && favicon != 'icon'">
+                        <div class="animate w-7 h-7 flex items-center justify-center group-hover:w-12 group-hover:-mt-7 transition-all" v-else-if="favicon == 'icon'">
+                            <i :class="'bi bi-' + monitor.icon + ' text-xl group-hover:text-4xl transition-all'"></i>
+                        </div>
+                        <div class="animate animate-pulse w-7 h-7 flex items-center justify-center group-hover:w-12 group-hover:-mt-7 transition-all" v-else>
+                            <i class="bi bi-globe text-xl group-hover:text-4xl transition-all"></i>
+                        </div>
+                        <template #content v-if="monitor.note">
+                            <div v-html="monitor.note.replace(/\r\n|\r|\n/g,'<br />')"></div>
+                        </template>
                     </Popper>
-                    <p class="truncate">
+                    <p class="truncate h-7">
                         <a :href="monitor.url?monitor.url:'http://'+monitor.address" target="_blank" class="text-sm text-blue-500/[0.8] hover:text-blue-300 truncate"> ( {{ monitor.address }} ) </a>
                     </p>
                 </div>
