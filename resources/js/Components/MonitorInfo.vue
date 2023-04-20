@@ -23,7 +23,7 @@ onMounted(() => {
     
     loop.value = setInterval(() => {
         loadLatestPings();
-    }, props.monitor.interval / 2);
+    }, props.monitor.interval / 3);
 
     if( props.monitor.icon == "favicon" ){
         if( !props.monitor.url ) {
@@ -49,7 +49,6 @@ const loadLatestPings = async () => {
                 return;
             }
             pings.value = response.data.pings;
-            //last_response.value = moment(String(pings.value[0].created_at)).format('hh:mm:ss');
         })
         .catch((error) => {
             console.log(error);
@@ -114,7 +113,7 @@ const lastChange = async () => {
         if (message == '') {
             message = '< 1 min';
         }
-        if (lastChange.response_time == 0) {
+        if (lastChange.response_time == 0 || lastChange.first == 1) {
             lastIcon.value.attributes.removeNamedItem('class');
             lastIcon.value.setAttribute('class', 'bi bi-check-lg text-green-500');
             return message;
@@ -131,9 +130,9 @@ const lastChange = async () => {
 <template>
     <div class="group relative">
         <div class="absolute -inset-1 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-lg blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-        <div class="relative p-4 sm:p-4 bg-white dark:bg-slate-800 dark:text-slate-200 shadow sm:rounded-lg auto-cols-max items-center flex flex-wrap">
+        <div class="relative p-4 sm:p-2 bg-white dark:bg-slate-800 dark:text-slate-200 shadow sm:rounded-lg auto-cols-max items-center flex flex-wrap">
             <div class="flex w-8/12">
-                <Popper class="shrink-0 cursor-help" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover :content="monitor.note">
+                <Popper class="shrink-0 cursor-help" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover>
                     <img class="sm:block hidden h-auto w-12" :src="favicon" :alt="monitor.address + ' Logo'" v-if="favicon && favicon != 'icon'">
                     <div class="animate w-10 h-10 flex items-center justify-center" v-else-if="favicon == 'icon'">
                         <i :class="'bi bi-' + monitor.icon + ' text-4xl mt-4'"></i>
@@ -141,10 +140,15 @@ const lastChange = async () => {
                     <div class="animate animate-pulse w-10 h-10 flex items-center justify-center text" v-else>
                         <i class="bi bi-globe text-4xl mt-4"></i>
                     </div>
+                    <template #content>
+                        <div v-html="monitor.note.replace(/\r\n|\r|\n/g,'<br />')"></div>
+                    </template>
                 </Popper>
                 <div class="items-center pl-2 overflow-hidden">
-                    <Popper class="text-lg truncate cursor-help" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover :content="monitor.name">{{ monitor.name }}</Popper>
-                    <p>
+                    <Popper style="border: 0!important; margin: 0!important; display:block!important;" arrow hover :content="monitor.name">
+                        <div class="text-lg truncate cursor-help">{{ monitor.name }}</div>
+                    </Popper>
+                    <p class="truncate">
                         <a :href="monitor.url?monitor.url:'http://'+monitor.address" target="_blank" class="text-sm text-blue-500/[0.8] hover:text-blue-300 truncate"> ( {{ monitor.address }} ) </a>
                     </p>
                 </div>
@@ -162,8 +166,8 @@ const lastChange = async () => {
                 <i ref="lastIcon" class="bi bi-clock"></i> {{ last_response }}
             </span>
             <div class="w-full left-0 right-0 mt-1" v-if="pings" @click="emit('stats')">
-                <div class="object-fill max-w-full flex gap-x-0.5 flex-nowrap flex-row-reverse">
-                    <div class="flex-auto" v-for="ping in pings.slice()" :key="ping.created_at">
+                <div class="object-fill max-w-full flex gap-x-0.5 flex-nowrap flex-row-reverse overflow-x-hidden">
+                    <div class="flex-auto text-sm" v-for="ping in pings.slice()" :key="ping.created_at">
                         <Popper style="border: 0!important; margin: 0!important; display:block!important;" arrow hover placement="bottom" :content="ping.response_time + ' ms'">
                             <div class="rounded cursor-help" 
                                 v-bind:class="pingColor(ping)"

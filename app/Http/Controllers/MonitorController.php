@@ -49,11 +49,16 @@ class MonitorController extends Controller
      */
     public function lastChange(monitor $monitor)
     {
+        $lastChange = null;
         $lastPing = $monitor->latestPings()->get();
         if($lastPing[0]->response_time == 0) {
             $lastChange = $monitor->pings()->where('response_time', '!=', 0)->latest()->first();
         }else{
             $lastChange = $monitor->pings()->where('response_time', '=', 0)->latest()->first();
+        }
+        if($lastChange == null) {
+            $lastChange = $monitor->pings()->first();
+            $lastChange['first'] = true;
         }
         return response()->json([
             'lastChange' => $lastChange
@@ -239,5 +244,33 @@ class MonitorController extends Controller
         $url = $url[0];
 
         return $url;
+    }
+
+    /**
+     * Import monitors from a csv file.
+     * format : name,address,url,command,note
+     */
+    public function import(Request $request) {
+        $request->validate([
+            'file' => 'required',
+        ]);
+
+        $file = $request->file('file');
+        $file = fopen($file, 'r');
+        while (($line = fgetcsv($file)) !== FALSE) {
+            $monitor = monitor::create([
+                'name' => $line[0],
+                'address' => self::cleanUrl($line[1]),
+                'user_id' => auth()->user()->id,
+                'url' => $line[2],
+                'note' => $line[3],
+                'command' => $line[4],
+            ]);
+        }
+        fclose($file);
+
+        return response()->json([
+            'message' => 'Importé'
+        ],200);
     }
 }

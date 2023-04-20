@@ -18,6 +18,7 @@ const props = defineProps({
 let listMonitors = ref(props.monitors);
 let selectedMonitor = ref(null);
 
+const showImportMonitorModal = ref(false);
 const showDetailsMonitorModal = ref(false);
 const showDeleteMonitorModal = ref(false);
 const showNewMonitorModal = ref(false);
@@ -110,6 +111,21 @@ const edit = (monitor) => {
     showNewMonitorModal.value = true;
 }
 
+const importMonitor = async () => {
+    const formData = new FormData();
+    formData.append('file', document.getElementById('csvInput').files[0]);
+    await axios 
+        .post('/monitors/import', formData)
+        .then((response) => {
+            loadMonitors();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    
+    showImportMonitorModal.value = false;
+}
+
 const loadMonitors = async () => {
     await axios
         .get('/monitors')
@@ -141,25 +157,19 @@ const changeIcon = () => {
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Tableau de bord</h2>
                 
                 <!-- Add button aligned to the right -->
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="add">
-                    Ajouter un appareil
-                </button>
-            </div>
-        </template>
-
-        <!--div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">Bienvenue dans votre gestion des appareils en ligne</div>
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="showNewMonitorModal = true">
+                <div >
+                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="add">
                         Ajouter un appareil
+                    </button>
+                    <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="showImportMonitorModal = true">
+                        <i class="bi bi-download"></i>
                     </button>
                 </div>
             </div>
-        </div-->
+        </template>
 
         <!-- foreach monitors -->
-        <div class="py-4 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[2500px]:grid-cols-8 gap-4 auto-cols-[minmax(0,_2fr)] px-5">
+        <div class="px-3 py-3 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[2500px]:grid-cols-8 gap-2 auto-cols-[minmax(0,_2fr)]">
             <MonitorInfo :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" @stats="selectedMonitor = monitor; showDetailsMonitorModal = true;" @edit="edit(monitor)" @delete="selectedMonitor = monitor; showDeleteMonitorModal = true;" />
         </div>
         
@@ -264,6 +274,31 @@ const changeIcon = () => {
                             <div class="flex justify-center items-center w-full mt-2 gap-2">
                                 <button class="w-1/2 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold focus:outline-none" type="button" @click="showDeleteMonitorModal = false">Annuler</button>
                                 <button class="w-1/2 h-10 rounded-lg bg-red-500 text-white text-sm font-semibold focus:outline-none" type="submit" @click.prevent="deleteMonitor()">Supprimer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </Modal>
+
+        <Modal :show="showImportMonitorModal" @close="showImportMonitorModal = false">
+            <div class="flex flex-col justify-center items-center h-screen">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-96">
+                    <div class="flex flex-col justify-center items-center pt-8">
+                        <div class="flex justify-center items-center w-16 h-16 rounded-full bg-blue-500">
+                            <i class="bi bi-download text-white text-4xl pt-2"></i>
+                        </div>
+                        <h2 class="text-gray-800 dark:text-gray-200 text-2xl font-semibold mt-2">Importer un tableau</h2>
+                    </div>
+                    <div class="flex flex-col justify-center items-center pt-4 pb-8">
+                        <form class="flex flex-col justify-center items-center">
+                            <h3 class="text-gray-800 dark:text-gray-200 text-sm font-semibold">Votre csv doit être formater dans l'ordre suivant :<br/> Nom de l'appareil, Adresse, URL, Note, Commande</h3>
+                            <div class="flex justify-center items-center w-full mt-2 gap-2">
+                                <input type="file" accept=".csv" class="w-80 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none" id="csvInput">
+                            </div>
+                            <div class="flex justify-center items-center w-full mt-2 gap-2">
+                                <button class="w-1/2 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm font-semibold focus:outline-none" type="button" @click="showImportMonitorModal = false">Annuler</button>
+                                <button class="w-1/2 h-10 rounded-lg bg-blue-500 text-white text-sm font-semibold focus:outline-none" type="submit" @click.prevent="importMonitor()">Importer</button>
                             </div>
                         </form>
                     </div>
