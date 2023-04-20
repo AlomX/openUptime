@@ -98,6 +98,7 @@ class MonitorController extends Controller
             'command' => $request->command,
             'note' => $request->note,
             'icon' => $request->icon,
+            'links' => self::cleanLinks($request->links),
         ]);
         
         return response()->json([
@@ -126,6 +127,19 @@ class MonitorController extends Controller
      */
     public function update(Request $request, monitor $monitor)
     {
+        $request->validate([
+            'name' => 'required',
+            'address' => 'required',
+        ]);
+
+        if( !filter_var($request->address, FILTER_VALIDATE_URL) && !filter_var($request->address, FILTER_VALIDATE_IP) && !filter_var($request->address, FILTER_VALIDATE_DOMAIN) ) {
+            return response()->json([
+                'message' => 'Invalid URL'
+            ],400);
+        }
+
+        $monitor->links = self::cleanLinks($request->links);
+
         $monitor->update([
             'name' => $request->name,
             'address' => self::cleanUrl($request->address),
@@ -244,6 +258,26 @@ class MonitorController extends Controller
         $url = $url[0];
 
         return $url;
+    }
+
+    /**
+     * Cleanup links array
+     */
+    private static function cleanLinks($links) {
+        foreach($links as $key => $link) {
+            if($link == null || $link == '' || !$link['url']) {
+                unset($links[$key]);
+            }else{
+                if(!$link['name']){
+                    $links[$key]['name'] = $link['url'];
+                }
+                if(!preg_match('/^(http|https|ftp)/', $link['url'])) {
+                    $links[$key]['url'] = 'http://'.$link['url'];
+                }
+            }
+        }
+
+        return json_encode($links);
     }
 
     /**

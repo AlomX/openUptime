@@ -3,6 +3,9 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import moment from 'moment';
 import Popper from "vue3-popper";
 
+import Dropdown from '@/Components/Dropdown.vue';
+import DropdownLink from '@/Components/DropdownLink.vue';
+
 const emit = defineEmits(['edit', 'delete', 'stats']);
 
 const lastIcon = ref(null);
@@ -141,7 +144,7 @@ const lastChange = async () => {
                         <i class="bi bi-globe text-4xl mt-4"></i>
                     </div>
                     <template #content>
-                        <div v-html="monitor.note.replace(/\r\n|\r|\n/g,'<br />')"></div>
+                        <div v-html="monitor.note?monitor.note.replace(/\r\n|\r|\n/g,'<br />'):null"></div>
                     </template>
                 </Popper>
                 <div class="items-center pl-2 overflow-hidden">
@@ -155,7 +158,25 @@ const lastChange = async () => {
             </div>
             <span class="w-4/12 text-right text-slate-500 shrink pt-1" v-if="pings">
                 <!-- options buttons -->
-                <div>
+                <div class="flex align-middle justify-end">
+                    <Dropdown align="right" width="48" v-if="monitor.links">
+                        <template #trigger>
+                            <div class="btn btn-sm hover:text-blue-500 mr-2">
+                                <i class="bi bi-bookmarks-fill"></i>
+                            </div>
+                        </template>
+
+                        <template #content>
+                            <a
+                                v-for="link in JSON.parse(monitor.links)" :key="link.id"
+                                :href="link.url"
+                                target="_blank"
+                                class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out"
+                            >
+                                {{ link.name }}
+                            </a>
+                        </template>
+                    </Dropdown>
                     <button class="btn btn-sm hover:text-blue-500 mr-2" @click="emit('edit')">
                         <i class="bi bi-pencil-fill"></i>
                     </button>

@@ -29,6 +29,7 @@ const monitorInterval = ref(300000);
 const monitorNote = ref('');
 const monitorIcon = ref('favicon');
 const monitorCommand = ref('');
+const monitorLinks = ref([]);
 
 let openParameters = ref(false);
 
@@ -42,6 +43,7 @@ const createMonitor = async () => {
             note: monitorNote.value,
             icon: monitorIcon.value,
             command: monitorCommand.value,
+            links: monitorLinks.value,
         })
         .then((response) => {
             loadMonitors();
@@ -63,6 +65,7 @@ const updateMonitor = async () => {
             note: monitorNote.value,
             icon: monitorIcon.value,
             command: monitorCommand.value,
+            links: monitorLinks.value,
         })
         .then((response) => {
             loadMonitors();
@@ -95,6 +98,7 @@ const add = () => {
     monitorNote.value = '';
     monitorIcon.value = 'favicon';
     monitorCommand.value = '';
+    monitorLinks.value = [];
     selectedMonitor.value = null;
     showNewMonitorModal.value = true;
 }
@@ -107,6 +111,7 @@ const edit = (monitor) => {
     monitorNote.value = monitor.note;
     monitorIcon.value = monitor.icon;
     monitorCommand.value = monitor.command;
+    monitorLinks.value = JSON.parse(monitor.links);
     selectedMonitor.value = monitor;
     showNewMonitorModal.value = true;
 }
@@ -146,6 +151,17 @@ const changeIcon = () => {
     }
 }
 
+const addLink = () => {
+    try {
+        monitorLinks.value.push({name: '', url: ''});
+    } catch (e) {
+        monitorLinks.value = [{name: '', url: ''}];
+    }
+}
+
+const removeLink = (index) => {
+    monitorLinks.value.splice(index, 1);
+}
 </script>
 
 <template>
@@ -178,7 +194,7 @@ const changeIcon = () => {
         <!-- modal to add a new monitor -->
         <Modal :show="showNewMonitorModal" @close="showNewMonitorModal = false;">
             <div class="flex flex-col justify-center items-center h-screen">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-96">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-96  overflow-y-auto">
                     <div class="flex flex-col justify-center items-center pt-8">
                         <div class="flex justify-center items-center w-16 h-16 rounded-full bg-blue-500">
                             <i class="bi bi-hdd-network text-white text-4xl pt-2"></i>
@@ -243,6 +259,18 @@ const changeIcon = () => {
                                     <textarea class="w-80 h-20 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4 mt-2" placeholder="Note" v-model="monitorNote"></textarea>
                                     <div class="flex justify-between items-center">
                                         <input type="text" class="w-80 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" placeholder="Commande a éxécuter avec le ping" v-model="monitorCommand">
+                                    </div>
+                                </div>
+                                <!-- Multiple link bookmarker with a form repeater ( Name and URL ) -->
+                                <div class="flex justify-between items-center mt-2">
+                                    <h3 class="text-gray-800 dark:text-gray-200 text-sm font-semibold">Liens</h3>
+                                    <button class="w-8 h-8 rounded-full bg-blue-500 text-white text-lg font-semibold focus:outline-none" type="button" @click="addLink()">+</button>
+                                </div>
+                                <div class="flex flex-col justify-center items-center my-2" v-for="(link, index) in monitorLinks" :key="index">
+                                    <div class="flex justify-between items-center w-full gap-1">
+                                        <input type="text" class="w-5/12 h-8 rounded-md border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-2" placeholder="Nom du lien" v-model="link.name">
+                                        <input type="text" class="w-6/12 h-8 rounded-md border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-2" placeholder="URL du lien" v-model="link.url">
+                                        <button class="w-1/12 h-8 rounded-md bg-red-500 text-white text-xl font-semibold focus:outline-none" type="button" @click="removeLink(index)">-</button>
                                     </div>
                                 </div>
                             </div>
