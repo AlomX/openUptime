@@ -264,6 +264,9 @@ class MonitorController extends Controller
      * Cleanup links array
      */
     private static function cleanLinks($links) {
+        if(empty($links)) {
+            return null;
+        }
         foreach($links as $key => $link) {
             if($link == null || $link == '' || !$link['url']) {
                 unset($links[$key]);
