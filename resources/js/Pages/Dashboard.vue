@@ -1,6 +1,6 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { ref } from 'vue';
 
 import MonitorInfo from '@/Components/MonitorInfo.vue';
 import MonitorDetails from '@/Components/MonitorDetails.vue';
@@ -13,11 +13,6 @@ const props = defineProps({
     monitors: {
         type: Object,
     }
-});
-
-onMounted(() => {
-    console.log('Mounted');
-    console.log(props.monitors);
 });
 
 let listMonitors = ref(props.monitors);

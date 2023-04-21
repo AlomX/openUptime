@@ -31,7 +31,7 @@ class MonitorController extends Controller
     }
 
     /**
-     * Send the last 50 pings of the monitor.
+     * Send the last pings of the monitor by the interval.
      */
     public function latestPings(monitor $monitor)
     {

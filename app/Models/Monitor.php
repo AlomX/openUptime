@@ -71,7 +71,16 @@ class Monitor extends Model
      */
     public function latestPings(): HasMany
     {
-        return $this->hasMany(Ping::class)->latest()->limit(50);
+        if($this->interval <= 60000) {
+            $count = 50;
+        }else if($this->interval <= 300000) {
+            $count = 24;
+        }else if($this->interval <= 1800000) {
+            $count = 12;
+        }else {
+            $count = 6;
+        }
+        return $this->hasMany(Ping::class)->latest()->limit($count);
     }
 
     /**
