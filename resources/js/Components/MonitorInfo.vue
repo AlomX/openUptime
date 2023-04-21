@@ -6,7 +6,7 @@ import Popper from "vue3-popper";
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 
-const emit = defineEmits(['edit', 'delete', 'stats']);
+const emit = defineEmits(['edit', 'delete', 'stats', 'ping', 'moveBack', 'moveForward']);
 
 const lastIcon = ref(null);
 const props = defineProps({
@@ -52,6 +52,7 @@ const loadLatestPings = async () => {
                 return;
             }
             pings.value = response.data.pings;
+            alert();
         })
         .catch((error) => {
             console.log(error);
@@ -128,6 +129,16 @@ const lastChange = async () => {
     }
     return '';
 }
+
+const alert = () => {
+    // get the last two ping and if the last indicates a failure and the previous one was a success then make a sound
+    if (pings.value.length > 1) {
+        if (pings.value[0].response_time == 0 && pings.value[1].response_time > 0) {
+            let audio = new Audio('/audio/alert.mp3');
+            audio.play();
+        }
+    }
+}
 </script>
 
 <template>
@@ -180,11 +191,34 @@ const lastChange = async () => {
                     <button class="btn btn-sm hover:text-blue-500 mr-2" @click="emit('edit')">
                         <i class="bi bi-pencil-fill"></i>
                     </button>
-                    <button class="btn btn-sm hover:text-red-500" @click="emit('delete')">
+                    <Dropdown align="right" width="48">
+                        <template #trigger>
+                            <div class="btn btn-sm hover:text-blue-500">
+                                <i class="bi bi-gear-fill"></i>
+                            </div>
+                        </template>
+
+                        <template #content>
+                            <button class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out" @click="emit('ping')">
+                                <i class="bi bi-arrow-repeat"></i> Forcer le ping
+                            </button>
+                            <button class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out" @click="emit('moveBack')">
+                                <i class="bi bi-arrow-left"></i> Déplacer en arrière
+                            </button>
+                            <button class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out" @click="emit('moveForward')">
+                                <i class="bi bi-arrow-right"></i> Déplacer en avant
+                            </button>
+                            <hr class="my-2">
+                            <button class="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:bg-gray-100 dark:focus:bg-gray-800 transition duration-150 ease-in-out hover:text-red-500 dark:hover:text-red-500" @click="emit('delete')">
+                                <i class="bi bi-trash-fill"></i> Supprimer
+                            </button>
+                        </template>
+                    </Dropdown>
+                    <!--button class="btn btn-sm hover:text-red-500" @click="emit('delete')">
                         <i class="bi bi-trash-fill"></i>
-                    </button>
+                    </button-->
                 </div>
-                <i ref="lastIcon" class="bi bi-clock"></i> {{ last_response }}
+                <i ref="lastIcon" class="bi bi-clock"></i><span class="truncate text-sm"> {{ last_response }}</span>
             </span>
             <div class="w-full left-0 right-0 mt-1" v-if="pings" @click="emit('stats')">
                 <div class="object-fill max-w-full flex gap-x-0.5 flex-nowrap flex-row-reverse overflow-x-hidden">

@@ -12,6 +12,15 @@ class Monitor extends Model
 {
     use HasFactory, HasUuids;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->order = Monitor::max('order') + 1;
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -27,6 +36,8 @@ class Monitor extends Model
         'icon',
         'key',
         'user_id',
+        'links',
+        'order',
     ];
 
     /**

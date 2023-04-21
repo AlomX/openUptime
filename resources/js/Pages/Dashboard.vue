@@ -1,18 +1,23 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import Modal from '@/Components/Modal.vue';
 import { Head } from '@inertiajs/vue3';
-
 import { onMounted, onUnmounted, ref } from 'vue';
 
 import MonitorInfo from '@/Components/MonitorInfo.vue';
 import MonitorDetails from '@/Components/MonitorDetails.vue';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Modal from '@/Components/Modal.vue';
+
 import axios from 'axios';
 
 const props = defineProps({
     monitors: {
         type: Object,
     }
+});
+
+onMounted(() => {
+    console.log('Mounted');
+    console.log(props.monitors);
 });
 
 let listMonitors = ref(props.monitors);
@@ -162,6 +167,31 @@ const addLink = () => {
 const removeLink = (index) => {
     monitorLinks.value.splice(index, 1);
 }
+
+const forcePing = async (monitor) => {
+    await axios
+        .post('/monitors/' + monitor.id + '/ping')
+        .then((response) => {
+            listMonitors.value = null;
+            loadMonitors();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+const moveOrder = (monitor, newPosition) => {
+    axios
+        .patch('/monitors/' + monitor.id + '/order', {
+            order: newPosition,
+        })
+        .then((response) => {
+            loadMonitors();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 </script>
 
 <template>
@@ -186,7 +216,15 @@ const removeLink = (index) => {
 
         <!-- foreach monitors -->
         <div class="px-3 py-3 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[2500px]:grid-cols-8 gap-2 auto-cols-[minmax(0,_2fr)]">
-            <MonitorInfo :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" @stats="selectedMonitor = monitor; showDetailsMonitorModal = true;" @edit="edit(monitor)" @delete="selectedMonitor = monitor; showDeleteMonitorModal = true;" />
+            <MonitorInfo 
+                :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" 
+                @stats="selectedMonitor = monitor; showDetailsMonitorModal = true;" 
+                @edit="edit(monitor)" 
+                @delete="selectedMonitor = monitor; showDeleteMonitorModal = true;" 
+                @ping="forcePing(monitor)"
+                @moveBack="moveOrder(monitor, monitor.order - 1)"
+                @moveForward="moveOrder(monitor, monitor.order + 1)"
+            />
         </div>
         
         <MonitorDetails :monitor="selectedMonitor" :showDetailsMonitorModal="showDetailsMonitorModal" :key="selectedMonitor" @close="showDetailsMonitorModal = false; selectedMonitor = null;" />
@@ -291,7 +329,7 @@ const removeLink = (index) => {
             <div class="flex flex-col justify-center items-center h-screen">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-96">
                     <div class="flex flex-col justify-center items-center pt-8">
-                        <div class="flex justify-center items-center w-16 h-16 rounded-full bg-blue-500">
+                        <div class="flex justify-center items-center w-16 h-16 rounded-full bg-red-500">
                             <i class="bi bi-send-x text-white text-4xl pt-2 -ml-1"></i>
                         </div>
                         <h2 class="text-gray-800 dark:text-gray-200 text-2xl font-semibold mt-2">Supprimer un Appareil</h2>

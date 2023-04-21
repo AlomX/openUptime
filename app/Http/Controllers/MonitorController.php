@@ -13,11 +13,10 @@ class MonitorController extends Controller
      */
     public function index()
     {
-        $monitors = monitor::all();
+        $monitors = Monitor::orderBy('order', 'asc')->get();
         return response()->json([
             'monitors' => $monitors
         ],200);
-        
     }
 
     /**
@@ -156,6 +155,43 @@ class MonitorController extends Controller
     }
 
     /**
+     * Update the order of the monitors.
+     */
+    public function switchOrder(Request $request, $monitorId)
+    {
+        $request->validate([
+            'order' => 'required',
+        ]);
+
+        $currentMonitor = Monitor::find($monitorId);
+        $otherMonitor = Monitor::where('order', $request->order)->first();
+
+        if ($otherMonitor) {
+            $otherMonitor->update([
+                'order' => $currentMonitor->order
+            ]);
+        }else{
+            // foreach all monitors and give them all a new order
+            $monitors = Monitor::orderBy('order', 'asc')->get();
+            $i = 1;
+            foreach($monitors as $monitor) {
+                if($i == $request->order) {
+                    $i++;
+                }
+                $monitor->update([
+                    'order' => $i
+                ]);
+                $i++;
+            }
+        }
+        $currentMonitor->update([
+            'order' => $request->order
+        ]);
+
+        return response()->json($request->order,200);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(monitor $monitor)
@@ -174,14 +210,23 @@ class MonitorController extends Controller
     public static function ping(monitor $monitor) {
         //detect OS
         $os = PHP_OS;
+
+        //if the adress contains : and a port, get it and remove it from the adress
+        $port = null;
+        $address = $monitor->address;
+        if(strpos($monitor->address, ':') !== false) {
+            $port = explode(':', $monitor->address)[1];
+            $address = explode(':', $monitor->address)[0];
+        }
+
         //ping the address
         if($os == 'WINNT') {
             // Windows
-            $pingInfo = shell_exec('ping -n 1 ' . $monitor->address . ' | findstr "TTL="');
+            $pingInfo = shell_exec('ping -n 1 ' . $address . ' | findstr "TTL="');
             // PowerShell = $pingInfo = shell_exec('ping -n 1 ' . $monitor->address . ' | Select-String "TTL="');
         } else {
             // Linux 
-            $pingInfo = shell_exec('ping -c 1 ' . $monitor->address . ' | grep "ttl="');
+            $pingInfo = shell_exec('ping -c 1 ' . $address . ' | grep "ttl="');
         }
 
         if( !empty($monitor->command) ) {
