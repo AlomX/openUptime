@@ -290,7 +290,7 @@ const convertWordToIcon = (word) => {
                 <!-- Add button aligned to the right -->
                 <div class="flex justify-end items-center flex-wrap">
                     <!-- Search input -->
-                    <div class="relative float-left text-gray-600 dark:text-gray-400 w-full mb-2 sm:mb-0">
+                    <div class="relative float-left text-gray-600 dark:text-gray-400 mb-2 sm:mb-0">
                         <input type="search" placeholder="Rechercher" class="w-full bg-white dark:bg-gray-800 h-10 px-5 pr-10 rounded text-sm focus:outline-none" v-model="searchInput" @keyup.enter="search">
                         <button type="button" class="absolute right-2 top-2" @click="search">
                             <i class="bi bi-search"></i>
