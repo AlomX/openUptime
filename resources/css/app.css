@@ -45,3 +45,13 @@ input[type="color"]::-webkit-color-swatch {
 	border: none;
     border-radius: 0.5rem;
 }
+
+.bg-diagonal-gradient {
+    background: repeating-linear-gradient(
+      45deg,
+      #8c1a1a 0px,
+      #8c1a1a 20px,
+      #db7474 20px,
+      #db7474 40px
+    );
+}

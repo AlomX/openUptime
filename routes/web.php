@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('monitors', MonitorController::class);
+    Route::post('/monitors/orderAlphabetical', [MonitorController::class, 'switchOrderAlphabetical'])->name('monitors.orderAlphabetical');
 
     Route::get('/monitors/{monitor}/pings', [MonitorController::class, 'pings'])->name('monitors.pings');
     Route::get('/monitors/{monitor}/latestPings', [MonitorController::class, 'latestPings'])->name('monitors.latestPings');

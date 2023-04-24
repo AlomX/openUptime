@@ -32,6 +32,7 @@ const monitorCommand = ref('');
 const monitorLinks = ref([]);
 
 let openParameters = ref(false);
+let searchInput = ref(null);
 
 const createMonitor = async () => {
     await axios 
@@ -187,6 +188,95 @@ const moveOrder = (monitor, newPosition) => {
             console.log(error);
         });
 }
+
+const moveOrderAlphabetical = () => {
+    axios
+        .post(route('monitors.orderAlphabetical'))
+        .then((response) => {
+            loadMonitors();
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+
+const search = async () => {
+    await loadMonitors();
+
+    listMonitors.value = listMonitors.value.filter((monitor) => {
+        monitor.url ? monitor.url : monitor.url = '';
+        monitor.note ? monitor.note : monitor.note = '';
+        monitor.icon ? monitor.icon : monitor.icon = 'favicon';
+
+        return monitor.name.toLowerCase().includes(searchInput.value.toLowerCase()) || 
+            monitor.address.toLowerCase().includes(searchInput.value.toLowerCase()) ||
+            monitor.url.toLowerCase().includes(searchInput.value.toLowerCase())     ||
+            monitor.note.toLowerCase().includes(searchInput.value.toLowerCase())    ||
+            monitor.icon == convertWordToIcon(searchInput.value.toLowerCase());
+    });
+}
+
+const convertWordToIcon = (word) => {
+    switch (word) {
+        case 'server': 
+        case 'serveur':
+            return 'hdd-network';
+        case 'website': 
+        case 'site': 
+        case 'internet':
+            return 'favicon';
+        case 'database': 
+        case 'bdd': 
+        case 'base de données':
+            return 'database';
+        case 'email': 
+        case 'mail': 
+        case 'courriel': 
+        case 'e-mail': 
+        case 'e-mail':
+            return 'envelope';
+        case 'tel': 
+        case 'telephone': 
+        case 'téléphone': 
+        case 'phone': 
+        case 'téléphone':
+            return 'phone';
+        case 'tv': 
+        case 'télévision': 
+        case 'television':
+            return 'tv';
+        case 'camera': 
+        case 'caméra': 
+        case 'caméra':
+            return 'camera-video';
+        case 'router': 
+        case 'routeur':
+            return 'router';
+        case 'modem': 
+        case 'modeme':
+            return 'modem';
+        case 'printer': 
+        case 'imprimante':
+            return 'printer';
+        case 'pc': 
+        case 'ordinateur': 
+        case 'computer': 
+        case 'ordinateur':
+            return 'pc-display';
+        case 'laptop': 
+        case 'portable': 
+        case 'ordinateur portable': 
+        case 'computer portable':
+            return 'laptop';
+        case 'tablet': 
+        case 'tablette':
+            return 'tablet';
+        case 'rack': 
+        case 'rack serveur': 
+        case 'rack serveur':
+            return 'hdd-rack';
+    }
+}
 </script>
 
 <template>
@@ -195,15 +285,25 @@ const moveOrder = (monitor, newPosition) => {
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Tableau de bord</h2>
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight mr-4 shrink-0">Tableau de bord</h2>
                 
                 <!-- Add button aligned to the right -->
-                <div >
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @click="add">
+                <div class="flex justify-end items-center flex-wrap">
+                    <!-- Search input -->
+                    <div class="relative float-left text-gray-600 dark:text-gray-400 w-full mb-2 sm:mb-0">
+                        <input type="search" placeholder="Rechercher" class="w-full bg-white dark:bg-gray-800 h-10 px-5 pr-10 rounded text-sm focus:outline-none" v-model="searchInput" @keyup.enter="search">
+                        <button type="button" class="absolute right-2 top-2" @click="search">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2" @click="add">
                         Ajouter un appareil
                     </button>
                     <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="showImportMonitorModal = true">
                         <i class="bi bi-download"></i>
+                    </button>
+                    <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="moveOrderAlphabetical">
+                        <i class="bi bi-type"></i>
                     </button>
                 </div>
             </div>

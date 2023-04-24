@@ -192,6 +192,24 @@ class MonitorController extends Controller
     }
 
     /**
+     * Update the order of the monitors by alphabetical order.
+     */
+    public function switchOrderAlphabetical()
+    {
+        // foreach all monitors and give them all a new order
+        $monitors = Monitor::orderBy('name', 'asc')->get();
+        $i = 1;
+        foreach($monitors as $monitor) {
+            $monitor->update([
+                'order' => $i
+            ]);
+            $i++;
+        }
+
+        return response()->json(true,200);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(monitor $monitor)
