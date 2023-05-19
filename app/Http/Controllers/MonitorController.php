@@ -232,31 +232,46 @@ class MonitorController extends Controller
         //if the adress contains : and a port, get it and remove it from the adress
         $port = null;
         $address = $monitor->address;
-        if(strpos($monitor->address, ':') !== false) {
-            $port = explode(':', $monitor->address)[1];
-            $address = explode(':', $monitor->address)[0];
+
+        // if the address is a valid url, use curl
+        if(filter_var($address, FILTER_VALIDATE_URL)) {
+            $headers = @get_headers($address);
+            if(!$headers || strpos( $headers[0], '404')) {
+                $pingInfo = false;
+                $ping = 0;
+            }
+            else {
+                $pingInfo = true;
+                $ping = 1;
+            }
+        }else{
+            if(strpos($monitor->address, ':') !== false) {
+                $port = explode(':', $monitor->address)[1];
+                $address = explode(':', $monitor->address)[0];
+            }
+    
+            //ping the address
+            if($os == 'WINNT') {
+                // Windows
+                $pingInfo = shell_exec('ping -n 1 ' . $address . ' | findstr "TTL="');
+                // PowerShell = $pingInfo = shell_exec('ping -n 1 ' . $monitor->address . ' | Select-String "TTL="');
+            } else {
+                // Linux 
+                $pingInfo = shell_exec('ping -c 1 ' . $address . ' | grep "ttl="');
+            }
+
+            if( !empty($monitor->command) ) {
+                shell_exec($monitor->command);
+            }
+    
+            // if ping contains unknown host or not found
+            if(strpos($pingInfo, 'unknown host') !== false 
+                || strpos($pingInfo, 'not found') !== false
+                || strpos($pingInfo, 'incorrect') !== false) {
+                $pingInfo = null;
+            }
         }
 
-        //ping the address
-        if($os == 'WINNT') {
-            // Windows
-            $pingInfo = shell_exec('ping -n 1 ' . $address . ' | findstr "TTL="');
-            // PowerShell = $pingInfo = shell_exec('ping -n 1 ' . $monitor->address . ' | Select-String "TTL="');
-        } else {
-            // Linux 
-            $pingInfo = shell_exec('ping -c 1 ' . $address . ' | grep "ttl="');
-        }
-
-        if( !empty($monitor->command) ) {
-            shell_exec($monitor->command);
-        }
-
-        // if ping contains unknown host or not found
-        if(strpos($pingInfo, 'unknown host') !== false 
-            || strpos($pingInfo, 'not found') !== false
-            || strpos($pingInfo, 'incorrect') !== false) {
-            $pingInfo = null;
-        }
         // if ping failed
         if(!$pingInfo) {
             //create a new ping
@@ -269,22 +284,24 @@ class MonitorController extends Controller
                 'ping' => 0
             ],200);
         }
-        //split the result and get all after temps or time
-        $ping = explode('temps=', $pingInfo);
-        if(empty($ping[1])) {
-            $ping = explode('time=', $pingInfo);
+        if(empty($ping)) {
+            //split the result and get all after temps or time
+            $ping = explode('temps=', $pingInfo);
+            if(empty($ping[1])) {
+                $ping = explode('time=', $pingInfo);
+            }
+            if(empty($ping[1])) {
+                $ping = explode('temps<', $pingInfo);
+            }
+            if(empty($ping[1])) {
+                $ping = explode('time<', $pingInfo);
+            }
+            //remove all after TTL=
+            $ping = explode('TTL=', $ping[1]);
+            //clean the result
+            $ping = str_replace(' ', '', $ping[0]);
+            $ping = str_replace('ms', '', $ping);
         }
-        if(empty($ping[1])) {
-            $ping = explode('temps<', $pingInfo);
-        }
-        if(empty($ping[1])) {
-            $ping = explode('time<', $pingInfo);
-        }
-        //remove all after TTL=
-        $ping = explode('TTL=', $ping[1]);
-        //clean the result
-        $ping = str_replace(' ', '', $ping[0]);
-        $ping = str_replace('ms', '', $ping);
         
         //create a new ping
         $monitor->pings()->create([
@@ -313,13 +330,14 @@ class MonitorController extends Controller
     private static function cleanUrl($url) {
         //clear string
         $url = str_replace(' ', '', $url);
-        //remove all http:// or https:// from the address
-        $url = str_replace('https://', '', $url);
-        $url = str_replace('http://', '', $url);
-        //remove all after / from the address
-        $url = explode('/', $url);
-        $url = $url[0];
-
+        if(!filter_var($url, FILTER_VALIDATE_URL)) {
+            //remove all http:// or https:// from the address
+            $url = str_replace('https://', '', $url);
+            $url = str_replace('http://', '', $url);
+            //remove all after / from the address
+            $url = explode('/', $url);
+            $url = $url[0];
+        }
         return $url;
     }
 
