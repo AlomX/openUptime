@@ -1,4 +1,6 @@
 <script setup>
+import VueMultiselect from 'vue-multiselect'
+
 import { Head } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -392,6 +394,32 @@ const convertWordToIcon = (word) => {
                                     <textarea class="w-80 h-20 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4 mt-2" placeholder="Note" v-model="monitorNote"></textarea>
                                     <div class="flex justify-between items-center">
                                         <input type="text" class="w-80 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" placeholder="Commande a éxécuter avec le ping" v-model="monitorCommand">
+                                    </div>
+                                    <!-- multi select for categories -->
+                                    <div class="flex justify-between items-center mt-2">
+                                        <VueMultiselect v-model="monitorLinks"
+                                            :options="[
+                                                { name: 'Vue.js', language: 'JavaScript' },
+                                                { name: 'Adonis', language: 'JavaScript' },
+                                                { name: 'Rails', language: 'Ruby' },
+                                                { name: 'Sinatra', language: 'Ruby' },
+                                                { name: 'Laravel', language: 'PHP' },
+                                                { name: 'Phoenix', language: 'Elixir' }
+                                            ]"
+                                            :multiple="true"
+                                            :searchable="false"
+                                            :close-on-select="false"
+                                            :clear-on-select="false"
+                                            :allow-empty="true"
+                                            :show-no-results="true"
+                                            :max-height="200" 
+                                            :select-label="'Ajouter'"
+                                            :selected-label="'Séléctionner'" 
+                                            :deselect-label="'Retirer'"
+                                            placeholder="Catégories" 
+                                            label="name" 
+                                            track-by="name" 
+                                        /> 
                                     </div>
                                 </div>
                                 <!-- Multiple link bookmarker with a form repeater ( Name and URL ) -->

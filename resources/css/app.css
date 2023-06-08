@@ -1,4 +1,5 @@
 @import 'bootstrap-icons/font/bootstrap-icons';
+@import 'vue-multiselect/dist/vue-multiselect';
 
 @tailwind base;
 @tailwind components;
