@@ -1,8 +1,9 @@
 <script setup>
-import VueMultiselect from 'vue-multiselect'
+//import VueMultiselect from 'vue-multiselect'
+import Popper from "vue3-popper";
 
 import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import MonitorInfo from '@/Components/MonitorInfo.vue';
 import MonitorDetails from '@/Components/MonitorDetails.vue';
@@ -14,11 +15,17 @@ import axios from 'axios';
 const props = defineProps({
     monitors: {
         type: Object,
-    }
+    },
+    category: {
+        type: String,
+        default: null,
+    },
 });
 
 let listMonitors = ref(props.monitors);
 let selectedMonitor = ref(null);
+
+let listCategories = ref([]);
 
 const showImportMonitorModal = ref(false);
 const showDetailsMonitorModal = ref(false);
@@ -35,6 +42,10 @@ const monitorLinks = ref([]);
 
 let openParameters = ref(false);
 let searchInput = ref(null);
+
+onMounted(() => {
+    listCategories.value = getAllUsedCategory();
+});
 
 const createMonitor = async () => {
     await axios 
@@ -139,6 +150,7 @@ const loadMonitors = async () => {
         .get('/monitors')
         .then((response) => {
             listMonitors.value = response.data.monitors;
+            listCategories.value = getAllUsedCategory();
         })
         .catch((error) => {
             console.log(error);
@@ -218,6 +230,16 @@ const search = async () => {
     });
 }
 
+const getAllUsedCategory = () => {
+    let categories = [];
+    listMonitors.value.forEach((monitor) => {
+        if(!categories.includes(monitor.icon)) {
+            categories.push(monitor.icon);
+        }
+    });
+    return categories;
+}
+
 const convertWordToIcon = (word) => {
     switch (word) {
         case 'server': 
@@ -279,6 +301,39 @@ const convertWordToIcon = (word) => {
             return 'hdd-rack';
     }
 }
+
+const convertIconToWord = (icon) => {
+    switch (icon) {
+        case 'hdd-network':
+            return 'Serveur';
+        case 'favicon':
+            return 'Web';
+        case 'database':
+            return 'Base de données';
+        case 'envelope':
+            return 'E-mail';
+        case 'phone':
+            return 'Téléphone';
+        case 'tv':
+            return 'Télévision';
+        case 'camera-video':
+            return 'Caméra';
+        case 'router':
+            return 'Routeur';
+        case 'modem':
+            return 'Modem';
+        case 'printer':
+            return 'Imprimante';
+        case 'pc-display':
+            return 'Ordinateur';
+        case 'laptop':
+            return 'Portable';
+        case 'tablet':
+            return 'Tablette';
+        case 'hdd-rack':
+            return 'Rack serveur';
+    }
+}
 </script>
 
 <template>
@@ -288,6 +343,16 @@ const convertWordToIcon = (word) => {
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight mr-4 shrink-0">Tableau de bord</h2>
+
+                <div class="flex-1 overflow-y-hidden overflow-x-auto -mb-5 mr-5 h-10 dark:text-white">
+                    <a :href="route('monitors.category', category)" class="underline text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 mr-3" v-for="category in listCategories" :key="category" v-if="listCategories.length > 1">
+                        {{ convertIconToWord(category) }}
+                    </a>
+                    <a :href="route('dashboard')" class="underline text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 mr-3" v-else>
+                        <i class="bi bi-arrow-left"></i>
+                        Retour
+                    </a>
+                </div>
                 
                 <!-- Add button aligned to the right -->
                 <div class="flex justify-end items-center flex-wrap">
@@ -301,12 +366,16 @@ const convertWordToIcon = (word) => {
                     <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2" @click="add">
                         Ajouter un appareil
                     </button>
-                    <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="showImportMonitorModal = true">
-                        <i class="bi bi-download"></i>
-                    </button>
-                    <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="moveOrderAlphabetical">
-                        <i class="bi bi-type"></i>
-                    </button>
+                    <Popper class="z-10" arrow hover content="Importer un tableau">
+                        <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="showImportMonitorModal = true">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </Popper>
+                    <Popper class="z-10" arrow hover content="Trier par ordre alphabetique">
+                        <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="moveOrderAlphabetical">
+                            <i class="bi bi-type"></i>
+                        </button>
+                    </Popper>
                 </div>
             </div>
         </template>
@@ -353,6 +422,28 @@ const convertWordToIcon = (word) => {
                                     </div>
                                 </button>
                                 <div class="mt-2" v-if="openParameters">
+                                    <!--div class="flex justify-between items-center mt-2">
+                                        <VueMultiselect v-model="monitorCategories"
+                                            :options="[
+                                                { name: 'Site Internet', id: '1' },
+                                                { name: 'Serveur', id: '2' },
+                                                { name: 'Imprimante', id: '3' },
+                                            ]"
+                                            :multiple="true"
+                                            :searchable="false"
+                                            :close-on-select="false"
+                                            :clear-on-select="false"
+                                            :allow-empty="true"
+                                            :show-no-results="true"
+                                            :max-height="300" 
+                                            :select-label="'Ajouter'"
+                                            :selected-label="'Séléctionner'" 
+                                            :deselect-label="'Retirer'"
+                                            placeholder="Catégories" 
+                                            label="name" 
+                                            track-by="name" 
+                                        /> 
+                                    </div-->
                                     <div class="flex justify-between items-center">
                                         <input type="text" class="w-80 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4 mt-2" placeholder="URL du lien" v-model="monitorUrl">
                                     </div>
@@ -394,32 +485,6 @@ const convertWordToIcon = (word) => {
                                     <textarea class="w-80 h-20 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4 mt-2" placeholder="Note" v-model="monitorNote"></textarea>
                                     <div class="flex justify-between items-center">
                                         <input type="text" class="w-80 h-10 rounded-lg border border-gray-300 dark:border-gray-700 focus:border-primary focus:outline-none px-4" placeholder="Commande a éxécuter avec le ping" v-model="monitorCommand">
-                                    </div>
-                                    <!-- multi select for categories -->
-                                    <div class="flex justify-between items-center mt-2">
-                                        <VueMultiselect v-model="monitorLinks"
-                                            :options="[
-                                                { name: 'Vue.js', language: 'JavaScript' },
-                                                { name: 'Adonis', language: 'JavaScript' },
-                                                { name: 'Rails', language: 'Ruby' },
-                                                { name: 'Sinatra', language: 'Ruby' },
-                                                { name: 'Laravel', language: 'PHP' },
-                                                { name: 'Phoenix', language: 'Elixir' }
-                                            ]"
-                                            :multiple="true"
-                                            :searchable="false"
-                                            :close-on-select="false"
-                                            :clear-on-select="false"
-                                            :allow-empty="true"
-                                            :show-no-results="true"
-                                            :max-height="200" 
-                                            :select-label="'Ajouter'"
-                                            :selected-label="'Séléctionner'" 
-                                            :deselect-label="'Retirer'"
-                                            placeholder="Catégories" 
-                                            label="name" 
-                                            track-by="name" 
-                                        /> 
                                     </div>
                                 </div>
                                 <!-- Multiple link bookmarker with a form repeater ( Name and URL ) -->

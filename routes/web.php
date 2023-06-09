@@ -39,8 +39,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('monitors', MonitorController::class);
+    Route::get('/monitors', [MonitorController::class, 'index'])->name('monitors.index');
+    Route::get('/monitors/{category}/list', [MonitorController::class, 'index'])->name('monitors.index');
+    Route::post('/monitors', [MonitorController::class, 'store'])->name('monitors.store');
+    Route::patch('/monitors/{monitor}/update', [MonitorController::class, 'update'])->name('monitors.update');
+    Route::delete('/monitors/{monitor}/delete', [MonitorController::class, 'destroy'])->name('monitors.destroy');
     Route::post('/monitors/orderAlphabetical', [MonitorController::class, 'switchOrderAlphabetical'])->name('monitors.orderAlphabetical');
+    Route::get('/monitors/{category}/show', [MonitorController::class, 'category'])->name('monitors.category');
 
     Route::get('/monitors/{monitor}/pings', [MonitorController::class, 'pings'])->name('monitors.pings');
     Route::get('/monitors/{monitor}/latestPings', [MonitorController::class, 'latestPings'])->name('monitors.latestPings');
