@@ -381,7 +381,7 @@ const convertIconToWord = (icon) => {
         </template>
 
         <!-- foreach monitors -->
-        <div class="px-3 py-3 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[2500px]:grid-cols-8 gap-2 auto-cols-[minmax(0,_2fr)]">
+        <div class="px-3 py-3 grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 min-[2500px]:grid-cols-8 gap-2 auto-cols-[minmax(0,_2fr)] overflow-x-hidden">
             <MonitorInfo 
                 :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" 
                 @stats="selectedMonitor = monitor; showDetailsMonitorModal = true;" 
