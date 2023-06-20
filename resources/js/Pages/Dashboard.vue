@@ -71,7 +71,7 @@ const createMonitor = async () => {
 
 const updateMonitor = async () => {
     await axios 
-        .put('/monitors/' + selectedMonitor.value.id, {
+        .put('/monitors/' + selectedMonitor.value.id + '/update', {
             name: monitorName.value,
             address: monitorAdress.value,
             url: monitorUrl.value,

@@ -42,7 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/monitors', [MonitorController::class, 'index'])->name('monitors.index');
     Route::get('/monitors/{category}/list', [MonitorController::class, 'index'])->name('monitors.index');
     Route::post('/monitors', [MonitorController::class, 'store'])->name('monitors.store');
-    Route::patch('/monitors/{monitor}', [MonitorController::class, 'update'])->name('monitors.update');
+    Route::put('/monitors/{monitor}/update', [MonitorController::class, 'update'])->name('monitors.update');
     Route::delete('/monitors/{monitor}/delete', [MonitorController::class, 'destroy'])->name('monitors.destroy');
     Route::post('/monitors/orderAlphabetical', [MonitorController::class, 'switchOrderAlphabetical'])->name('monitors.orderAlphabetical');
     Route::get('/monitors/{category}/show', [MonitorController::class, 'category'])->name('monitors.category');
