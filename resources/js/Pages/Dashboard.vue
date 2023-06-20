@@ -93,7 +93,7 @@ const updateMonitor = async () => {
 
 const deleteMonitor = async () => {
     await axios 
-        .delete('/monitors/' + selectedMonitor.value.id)
+        .delete('/monitors/' + selectedMonitor.value.id + '/delete')
         .then((response) => {
             loadMonitors();
         })
