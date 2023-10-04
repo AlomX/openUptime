@@ -38,6 +38,7 @@ class Monitor extends Model
         'user_id',
         'links',
         'order',
+        'status',
     ];
 
     /**

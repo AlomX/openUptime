@@ -15,6 +15,7 @@ const props = defineProps({
     }
 });
 
+let statusColor = ref("dark:text-slate-200");
 let favicon = ref(null);
 let pings = ref([]);
 let last_response = ref(null);
@@ -36,6 +37,8 @@ onMounted(() => {
         }
     }else{
         favicon.value = 'icon';
+        console.log(props.monitor.status);
+        statusToColor(props.monitor.status);
     }
 
 });
@@ -139,6 +142,39 @@ const alert = () => {
         }
     }
 }
+
+const statusToColor = (status) => {
+    switch (status) {
+        case 3:
+            statusColor.value = 'text-green-500';
+            return 'text-green-500';
+        case 2:
+            statusColor.value = 'text-red-500';
+            return 'text-red-500';
+        case 1:
+            statusColor.value = 'text-orange-400';
+            return 'text-orange-400';
+        default:
+            statusColor.value = 'dark:text-slate-200';
+            return 'dark:text-slate-200';
+    }
+}
+
+const switchStatus = () => {
+    props.monitor.status++;
+    if (props.monitor.status > 3) {
+        props.monitor.status = 0;
+    }
+    statusColor.value = 'animate-pulse';
+    axios
+        .put(route('monitors.update', props.monitor.id), props.monitor)
+        .then((response) => {
+            statusToColor(props.monitor.status);
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 </script>
 
 <template>
@@ -150,9 +186,9 @@ const alert = () => {
                     <div class="text-lg truncate cursor-help">{{ monitor.name }}</div>
                 </Popper>
                 <div class="items-center flex">
-                    <Popper class="cursor-help pr-2 shrink-0" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover>
+                    <Popper class="cursor-help pr-2 shrink-0" @click="switchStatus" style="border: 0!important; margin: 0!important; display:block!important;" arrow hover>
                         <img class="h-auto w-7 group-hover:w-12 group-hover:-mt-7 transition-all" :src="favicon" :alt="monitor.address + ' Logo'" v-if="favicon && favicon != 'icon'">
-                        <div class="animate w-7 h-7 flex items-center justify-center group-hover:w-12 group-hover:-mt-7 transition-all" v-else-if="favicon == 'icon'">
+                        <div class="animate w-7 h-7 flex items-center justify-center group-hover:w-12 group-hover:-mt-7 transition-all" :class="statusColor" v-else-if="favicon == 'icon'">
                             <i :class="'bi bi-' + monitor.icon + ' text-xl group-hover:text-4xl transition-all'"></i>
                         </div>
                         <div class="animate animate-pulse w-7 h-7 flex items-center justify-center group-hover:w-12 group-hover:-mt-7 transition-all" v-else>

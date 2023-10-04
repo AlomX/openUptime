@@ -145,6 +145,7 @@ class MonitorController extends Controller
             'command' => $request->command,
             'note' => $request->note,
             'icon' => $request->icon,
+            'status' => $request->status,
         ]);
 
         return response()->json([
