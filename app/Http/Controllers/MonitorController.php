@@ -135,6 +135,8 @@ class MonitorController extends Controller
             ],400);
         }
 
+        $request->status ? $request->status : $request->status = $monitor->status;
+
         $monitor->links = self::cleanLinks($request->links);
 
         $monitor->update([

@@ -37,7 +37,6 @@ onMounted(() => {
         }
     }else{
         favicon.value = 'icon';
-        console.log(props.monitor.status);
         statusToColor(props.monitor.status);
     }
 
