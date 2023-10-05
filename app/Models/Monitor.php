@@ -62,7 +62,7 @@ class Monitor extends Model
     /**
      * Get the Pings for the Monitor.
      */
-    public function Pings(): HasMany
+    public function pings(): HasMany
     {
         return $this->hasMany(Ping::class);
     }

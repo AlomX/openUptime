@@ -43,10 +43,18 @@ class MonitorController extends Controller
 
     /**
      * Send all pings of the monitor.
+     * By default it's the pings of the last 7 days.
      */
-    public function pings(monitor $monitor)
+    public function pings(monitor $monitor, $startDate = null, $endDate = null)
     {
-        $pings = $monitor->pings()->get();
+        if($startDate == null) {
+            $startDate = Carbon::now()->subDays(7);
+        }
+        if($endDate == null) {
+            $endDate = Carbon::now();
+        }
+        
+        $pings = $monitor->pings()->where('created_at', '>', $startDate)->where('created_at', '<', $endDate)->get();
         return response()->json([
             'pings' => $pings
         ],200);
@@ -83,6 +91,37 @@ class MonitorController extends Controller
         }
         return response()->json([
             'lastChange' => $lastChange
+        ],200);
+    }
+
+    /**
+     * Get pings of every time the monitor was down and up in the last 7 days.
+     */
+    public function history(monitor $monitor)
+    {
+        $pings = $monitor->pings()->where('created_at', '>', Carbon::now()->subDays(7))->get();
+        $history = [];
+        $i = 0;
+        foreach($pings as $key => $ping) {
+            if($key == 0) {
+                $history[$i]['end'] = $ping->created_at;
+                $history[$i]['status'] = $ping->response_time == 0 ? 'down' : 'up';
+            }else{
+                if($history[$i]['status'] == 'down' && $ping->response_time != 0) {
+                    $history[$i]['end'] = $ping->created_at;
+                    $i++;
+                    $history[$i]['start'] = $ping->created_at;
+                    $history[$i]['status'] = 'up';
+                }else if($history[$i]['status'] == 'up' && $ping->response_time == 0) {
+                    $history[$i]['end'] = $ping->created_at;
+                    $i++;
+                    $history[$i]['start'] = $ping->created_at;
+                    $history[$i]['status'] = 'down';
+                }
+            }
+        }
+        return response()->json([
+            'history' => $history
         ],200);
     }
 

@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/monitors/{monitor}/pings', [MonitorController::class, 'pings'])->name('monitors.pings');
     Route::get('/monitors/{monitor}/latestPings', [MonitorController::class, 'latestPings'])->name('monitors.latestPings');
     Route::get('/monitors/{monitor}/lastChange', [MonitorController::class, 'lastChange'])->name('monitors.lastChange');
+    Route::get('/monitors/{monitor}/history', [MonitorController::class, 'history'])->name('monitors.history');
     Route::post('/monitors/{monitor}/ping', [MonitorController::class, 'ping'])->name('monitors.ping');
     Route::post('/monitors/import', [MonitorController::class, 'import'])->name('monitors.import');
     Route::patch('/monitors/{monitor}/order', [MonitorController::class, 'switchOrder'])->name('monitors.order');

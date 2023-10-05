@@ -1,9 +1,9 @@
 <script setup>
 import Modal from '@/Components/Modal.vue';
+import MonitorDetailsGraph from './MonitorDetailsGraph.vue';
 
 import { onMounted, ref } from 'vue';
 
-import VueApexCharts from "vue3-apexcharts";
 import axios from 'axios';
 import moment from 'moment';
 
@@ -18,93 +18,8 @@ const props = defineProps({
     },
 });
 
-let pings = ref([]);
-
-// chart options with ApexCharts response_time by date
-const options = {
-    chart: {
-        height: 350,
-        stacked: false,
-        type: 'line',
-        tickPlacement: 'on',
-        toolbar: {
-            show: true,
-            offsetX: 0,
-            offsetY: 0,
-            tools: {
-                download: true,
-                selection: true,
-                zoom: true,
-                zoomin: true,
-                zoomout: true,
-                pan: true,
-            },
-            autoSelected: 'zoom' 
-        },
-        zoom: {
-            enabled: true,
-            type: 'x',
-            autoScaleYaxis: true,
-            zoomedArea: {
-                fill: {
-                    color: '#90CAF9',
-                    opacity: 0.4
-                },
-                stroke: {
-                    color: '#0D47A1',
-                    opacity: 0.4,
-                    width: 1
-                }
-            }
-        },
-    },
-    stroke: {
-        curve: 'stepline',
-    },
-    xaxis: {
-        tickAmount: 10,
-        labels: {
-            formatter: function (val) {
-                return moment(val).format('DD/MM/YYYY HH:mm')
-            }
-        }
-    },
-    yaxis: {
-        tickAmount: 1,
-        labels: {
-            // arround the response time to 2 decimals
-            formatter: function (val) {
-                return Math.round(val * 100) / 100
-            }
-        }
-    },
-    dataLabels: {
-        enabled: true,
-    },
-    title: {
-        text: 'Temps de réponse en millisecondes par date',
-        align: 'left',
-    },
-    grid: {
-        row: {
-            colors: ['#f3f4f5', 'transparent'], // takes an array which will be repeated on columns
-            opacity: 0.5,
-        },
-    },
-    theme: {
-        monochrome: {
-            enabled: true,
-            color: '#000',
-            shadeTo: 'light',
-            shadeIntensity: 0.65,
-        },
-    },
-};
-
-let series= ref([{
-    name : 'Temps de réponse',
-    data: []
-}]);
+let pingsHistory = ref([]);
+let message = ref("Chargement ...");
 
 onMounted(() => {
     loadPings();
@@ -116,33 +31,42 @@ const loadPings = async () => {
         return;
     }
     await axios
-        .get(route('monitors.pings', props.monitor.id))
+        .get(route('monitors.history', props.monitor.id))
         .then((response) => {
-            pings.value = response.data.pings;
-
-            // format the data to be displayed in the chart with ApexCharts
-            series.value[0].data = pings.value.map((ping) => {
-                return {
-                    x: ping.created_at,
-                    y: ping.response_time,
-                }
-            });
-
+            pingsHistory.value = response.data.history;
+            message.value = "Aucun ping pour ce moniteur dans les 7 derniers jours";
         })
         .catch((error) => {
             console.log(error);
         });
 }
-
 </script>
 
 <template>
     <!-- modal to add a new monitor -->
     <Modal :show="showDetailsMonitorModal" @close="emit('close')">
         <div class="flex flex-col justify-center items-center h-screen">
-            <div class="bg-white rounded-lg shadow-xl px-6">
+            <div class="bg-white rounded-lg shadow-xl px-6 pt-5">
+                <div class="flex flex-row justify-between items-center">
+                    <h2 class="text-2xl font-bold">Détails du moniteur</h2>
+                    <button class="text-gray-500 hover:text-gray-700 pl-5" @click="emit('close')">
+                        <i class="bi bi-x-circle-fill text-xl"></i>
+                    </button>
+                </div>
+                <div v-if="pingsHistory.length == 0">
+                    <p class="text-gray-600 text-center pt-4">{{ message }}</p>
+                </div>
+
+                <div class="flex flex-col pt-2 w-full pl-9">
+                    <div class="w-25 flex flex-row justify-between items border-b-2 pb-1" v-for="ping in pingsHistory" :key="ping.start">
+                        <span class="text-gray-600">
+                            <i class="bi text-xl" :class="ping.status == 'up' ? 'bi-arrow-up-right text-green-500' : 'bi-arrow-down-right text-red-500'"></i>
+                            {{ moment(ping.start).format('DD/MM/YYYY HH:mm') }}
+                        </span>
+                    </div>
+                </div>
                 <div class="pt-8">
-                    <VueApexCharts width="600" :options="options" :series="series"></VueApexCharts>
+                    <MonitorDetailsGraph :monitor="props.monitor" v-if="pingsHistory.length > 0" />
                 </div>
             </div>
         </div>
