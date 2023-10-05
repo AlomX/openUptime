@@ -57,7 +57,7 @@ const loadPings = async () => {
                     <p class="text-gray-600 text-center pt-4">{{ message }}</p>
                 </div>
 
-                <div class="flex flex-col pt-2 w-full pl-9">
+                <div class="flex flex-col pt-2 w-full pl-9 max-h-80 overflow-auto">
                     <div class="w-25 flex flex-row justify-between items border-b-2 pb-1" v-for="ping in pingsHistory" :key="ping.start">
                         <span class="text-gray-600">
                             <i class="bi text-xl" :class="ping.status == 'up' ? 'bi-arrow-up-right text-green-500' : 'bi-arrow-down-right text-red-500'"></i>
