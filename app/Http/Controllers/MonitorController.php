@@ -137,7 +137,9 @@ class MonitorController extends Controller
 
         $request->status ? $request->status : $request->status = $monitor->status;
 
-        $monitor->links = self::cleanLinks($request->links);
+        if(is_array($request->links)) {
+            $monitor->links = self::cleanLinks($request->links);
+        } 
 
         $monitor->update([
             'name' => $request->name,

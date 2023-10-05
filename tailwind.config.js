@@ -16,6 +16,11 @@ module.exports = {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            dropShadow: {
+              'green-500': '0 0 5px rgb(34, 197, 94)',
+              'orange-400': '0 0 5px rgb(251, 146, 60)',
+              'red-600': '0 0 5px rgb(220, 38, 38)'
+            }
         },
     },
 

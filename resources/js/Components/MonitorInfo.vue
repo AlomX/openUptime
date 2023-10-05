@@ -145,13 +145,13 @@ const alert = () => {
 const statusToColor = (status) => {
     switch (status) {
         case 3:
-            statusColor.value = 'text-green-500';
+            statusColor.value = 'text-green-500 drop-shadow-green-500';
             return 'text-green-500';
         case 2:
-            statusColor.value = 'text-red-500';
-            return 'text-red-500';
+            statusColor.value = 'text-red-600 drop-shadow-red-600 ';
+            return 'text-red-600';
         case 1:
-            statusColor.value = 'text-orange-400';
+            statusColor.value = 'text-orange-400 drop-shadow-orange-400';
             return 'text-orange-400';
         default:
             statusColor.value = 'dark:text-slate-200';
