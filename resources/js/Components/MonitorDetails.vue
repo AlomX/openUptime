@@ -34,6 +34,7 @@ const loadPings = async () => {
         .get(route('monitors.history', props.monitor.id))
         .then((response) => {
             pingsHistory.value = response.data.history;
+            console.log(pingsHistory.value);
             message.value = "Aucun ping pour ce moniteur dans les 7 derniers jours";
         })
         .catch((error) => {
@@ -48,7 +49,7 @@ const loadPings = async () => {
         <div class="flex flex-col justify-center items-center h-screen">
             <div class="bg-white rounded-lg shadow-xl px-6 pt-5">
                 <div class="flex flex-row justify-between items-center">
-                    <h2 class="text-2xl font-bold">Détails du moniteur</h2>
+                    <h2 class="text-2xl font-bold">{{ props.monitor.name }} <span class="text-gray-500 text-sm">({{ props.monitor.address }})</span></h2>
                     <button class="text-gray-500 hover:text-gray-700 pl-5" @click="emit('close')">
                         <i class="bi bi-x-circle-fill text-xl"></i>
                     </button>
@@ -60,8 +61,9 @@ const loadPings = async () => {
                 <div class="flex flex-col pt-2 w-full pl-9 max-h-80 overflow-auto">
                     <div class="w-25 flex flex-row justify-between items border-b-2 pb-1" v-for="ping in pingsHistory" :key="ping.start">
                         <span class="text-gray-600">
-                            <i class="bi text-xl" :class="ping.status == 'up' ? 'bi-arrow-up-right text-green-500' : 'bi-arrow-down-right text-red-500'"></i>
-                            {{ moment(ping.start).format('DD/MM/YYYY HH:mm') }}
+                            <i class="bi text-xl" :class="ping.status == 'up' ? 'bi-arrow-up-right text-green-500' : 'bi-arrow-down-right text-red-500'" v-if="ping.start"></i>
+                            <i class="bi text-xl" :class="ping.status == 'up' ? 'bi-three-dots text-green-500' : 'bi-three-dots text-red-500'" v-else></i>
+                            {{ ping.start ? moment(ping.start).format('DD/MM/YYYY HH:mm') : moment(ping.end).format('DD/MM/YYYY HH:mm') }}
                         </span>
                     </div>
                 </div>

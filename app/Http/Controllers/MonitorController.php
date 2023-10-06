@@ -43,12 +43,12 @@ class MonitorController extends Controller
 
     /**
      * Send all pings of the monitor.
-     * By default it's the pings of the last 7 days.
+     * By default it's the pings of the last 1 days.
      */
     public function pings(monitor $monitor, $startDate = null, $endDate = null)
     {
         if($startDate == null) {
-            $startDate = Carbon::now()->subDays(7);
+            $startDate = Carbon::now()->subDays(1);
         }
         if($endDate == null) {
             $endDate = Carbon::now();
@@ -99,7 +99,7 @@ class MonitorController extends Controller
      */
     public function history(monitor $monitor)
     {
-        $pings = $monitor->pings()->where('created_at', '>', Carbon::now()->subDays(7))->get();
+        $pings = $monitor->pings()->where('created_at', '>', Carbon::now()->subDays(7))->orderBy('created_at', 'asc')->get();
         $history = [];
         $i = 0;
         foreach($pings as $key => $ping) {
@@ -108,20 +108,20 @@ class MonitorController extends Controller
                 $history[$i]['status'] = $ping->response_time == 0 ? 'down' : 'up';
             }else{
                 if($history[$i]['status'] == 'down' && $ping->response_time != 0) {
-                    $history[$i]['end'] = $ping->created_at;
                     $i++;
+                    $history[$i]['end'] = $ping->created_at;
                     $history[$i]['start'] = $ping->created_at;
                     $history[$i]['status'] = 'up';
                 }else if($history[$i]['status'] == 'up' && $ping->response_time == 0) {
-                    $history[$i]['end'] = $ping->created_at;
                     $i++;
+                    $history[$i]['end'] = $ping->created_at;
                     $history[$i]['start'] = $ping->created_at;
                     $history[$i]['status'] = 'down';
                 }
             }
         }
         return response()->json([
-            'history' => $history
+            'history' => array_reverse($history)
         ],200);
     }
 
