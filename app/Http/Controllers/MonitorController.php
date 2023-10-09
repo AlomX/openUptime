@@ -174,7 +174,7 @@ class MonitorController extends Controller
             ],400);
         }
 
-        $request->status ? $request->status : $request->status = $monitor->status;
+        $request->status = isset($request->status) ? $request->status : $monitor->status;
 
         if(is_array($request->links)) {
             $monitor->links = self::cleanLinks($request->links);
@@ -190,7 +190,7 @@ class MonitorController extends Controller
             'icon' => $request->icon,
             'status' => $request->status,
         ]);
-
+        
         return response()->json([
             'monitor' => $monitor
         ],200);

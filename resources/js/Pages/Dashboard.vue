@@ -42,6 +42,8 @@ const monitorLinks = ref([]);
 
 let openParameters = ref(false);
 let searchInput = ref(null);
+let statusColor = ref("text-orange-400 drop-shadow-orange-400");
+let statusColorId = ref(1);
 
 onMounted(() => {
     listCategories.value = getAllUsedCategory();
@@ -230,6 +232,37 @@ const search = async () => {
     });
 }
 
+const statusToColor = (status) => {
+    switch (status) {
+        case 3:
+            statusColor.value = 'text-green-500 drop-shadow-green-500';
+            statusColorId.value = 3;
+            return 'text-green-500';
+        case 2:
+            statusColor.value = 'text-red-600 drop-shadow-red-600 ';
+            statusColorId.value = 2;
+            return 'text-red-600';
+        default:
+            statusColor.value = 'text-orange-400 drop-shadow-orange-400';
+            statusColorId.value = 1;
+            return 'text-orange-400';
+    }
+}
+
+const whiteStatusColor = async () => {
+    const promises = listMonitors.value.map((monitor) => {
+        if (monitor.icon != 'favicon' && monitor.status == statusColorId.value) {
+            monitor.status = 0;
+            return axios.put(route('monitors.update', monitor.id), monitor).then((response) => {
+                console.log(response);
+            });
+        }
+    });
+    await Promise.all(promises);
+    listMonitors.value = null;
+    loadMonitors();
+}
+
 const getAllUsedCategory = () => {
     let categories = [];
     listMonitors.value.forEach((monitor) => {
@@ -373,9 +406,26 @@ const convertIconToWord = (icon) => {
                     </Popper>
                     <Popper class="z-10" arrow hover content="Trier par ordre alphabetique">
                         <button class="bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 rounded ml-2" @click="moveOrderAlphabetical">
-                            <i class="bi bi-type"></i>
+                            <i class="bi bi-sort-alpha-down"></i>
                         </button>
                     </Popper>
+                    <div class="inline-flex rounded-md shadow-sm" role="group">
+                        <Popper class="z-10" arrow hover content="Couleur séléctionner">
+                            <button type="button" class="rounded-l bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 py-2 px-3 ml-2" 
+                                :class="statusToColor(statusColorId)" 
+                                @click="statusColorId = statusColorId == 3 ? 0 : statusColorId + 1">
+                                <i class="bi bi-palette2"></i>
+                            </button>
+                        </Popper>
+                        <Popper class="z-10" arrow hover content="Changer la couleur des icones en blanc">
+                            <button 
+                                type="button" 
+                                class="rounded-r bg-blue-300 dark:bg-blue-800 hover:bg-blue-700 text-white py-2 px-3 border-l-2 border-gray-800"
+                                @click="whiteStatusColor">
+                                Réinitialiser
+                            </button>
+                        </Popper>
+                    </div>
                 </div>
             </div>
         </template>
@@ -385,7 +435,7 @@ const convertIconToWord = (icon) => {
             <MonitorInfo 
                 :monitor="monitor" v-for="monitor in listMonitors" :key="monitor.id" 
                 @stats="selectedMonitor = monitor; showDetailsMonitorModal = true;" 
-                @edit="edit(monitor)" 
+                @edit="edit(monitor)"
                 @delete="selectedMonitor = monitor; showDeleteMonitorModal = true;" 
                 @ping="forcePing(monitor)"
                 @moveBack="moveOrder(monitor, monitor.order - 1)"

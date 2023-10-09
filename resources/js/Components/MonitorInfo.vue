@@ -4,7 +4,6 @@ import moment from 'moment';
 import Popper from "vue3-popper";
 
 import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
 
 const emit = defineEmits(['edit', 'delete', 'stats', 'ping', 'moveBack', 'moveForward']);
 
